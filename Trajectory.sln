@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Player", "Player\Player.csproj", "{97BEB821-088A-4429-8692-F9FFA4D19C2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modeling", "modeling\modeling.csproj", "{D3D1010B-2977-46C3-931A-84DE9C6B27CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{97BEB821-088A-4429-8692-F9FFA4D19C2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97BEB821-088A-4429-8692-F9FFA4D19C2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97BEB821-088A-4429-8692-F9FFA4D19C2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97BEB821-088A-4429-8692-F9FFA4D19C2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3D1010B-2977-46C3-931A-84DE9C6B27CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3D1010B-2977-46C3-931A-84DE9C6B27CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3D1010B-2977-46C3-931A-84DE9C6B27CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3D1010B-2977-46C3-931A-84DE9C6B27CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EE742899-5824-47B3-9F73-9A38B72DDC2A}
+	EndGlobalSection
+EndGlobal
