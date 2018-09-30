@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace modeling
 {
@@ -11,5 +12,13 @@ namespace modeling
         public double Voltage { get; set; }
         public double PwmFreq_Hz { get; set; }
         
+    }
+
+    public class Discrete_ss
+    {
+        public List<double> A { get; set; }
+        public List<double> B { get; set; }
+        public List<double> C { get; set; }
+
     }
 }
