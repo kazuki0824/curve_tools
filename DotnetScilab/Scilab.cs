@@ -65,6 +65,8 @@ namespace DotNetScilab
             // start Scilab engine configurated without java
             Scilab_cs_wrapper.StartScilab(null, null, null);
         }
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
         //=============================================================================
         public Scilab(Boolean _bWithGraphics)
         {
@@ -497,7 +499,7 @@ namespace DotNetScilab
         {
             // do a pause (we do not want 100% CPU used)
             // ugly but it works ...
-            Thread.Sleep(1);
+            //Thread.Sleep(1);
             // do a loop of parser
             return SendScilabJob("");
         }

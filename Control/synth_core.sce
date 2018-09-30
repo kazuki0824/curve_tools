@@ -17,7 +17,7 @@ function [A_, B_]=intersample24(sys)
 endfunction
 
 /*************/
-function [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E,b,J,R,L,T_pwm)
+function [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E,b,J,K,R,L,T_pwm)
     
     A_cp=[-b/J K/J ; -K/L -R/L];
     B_cp=[0;1/L];
@@ -64,10 +64,10 @@ function [C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)
     C1.dt=C2.dt
 endfunction
 
-function [Fpd]=getFpd()
+function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     //LQ
-    f_u = lqr(sys_u_p,diag([0,10] , 0))
-    
+    f_u = lqr(sys_u_p,diag([0,current_weight]) , input_weight)
+      
     [Ak , Bk]=intersample24(sys_u);
     
     //C2 anti-disturbance stabilization
