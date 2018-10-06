@@ -79,5 +79,11 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     Apd=[Ak(1:2,3) ; Ak(4:5,3)];
     Fd = -Bp\Apd
     Fpd=[Fp Fd*0.05]
-    
+endfunction
+
+function [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V)
+    Mat = sys_c_p.A;
+    intm = [-Mat(1,1)/Mat(1,2) 1/Mat(1,2) ; Mat(2,1) 0]*[velo;accel];
+    ref=[v;intm(1)];
+    Idot=intm(2)-Mat(2,2)*intm(2,:)-sys_c_p.B(2,:)*V;
 endfunction
