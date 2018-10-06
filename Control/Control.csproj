@@ -55,7 +55,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Visualizer1.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -16,7 +16,7 @@ namespace Control
             m_oSCilab = new Scilab(true);
             if (m_oSCilab.execScilabScript(System.AppDomain.CurrentDomain.BaseDirectory + "synth_core.sce") != 0)
             {
-                //err
+                //TODO:err
             }
             var cmd = string.Format("[sys_c_p, sys_u_p, sys_u, sys_f]=Motor(24,{0},{1},{2},{3},{4},{5});", 0, motor.Inertial_load, motor.K, motor.Resistance, motor.Inductance, 1.0 / motor.PwmFreq_Hz);
             m_oSCilab.SendScilabJob(cmd);
@@ -29,7 +29,7 @@ namespace Control
 
                 device = new MotorDriver(args[1]);
 
-                //Set Fpd, ABCD, and C1
+                //TODO:Set Fpd, ABCD, and C1
             }
             catch (System.Exception)
             {
@@ -37,9 +37,16 @@ namespace Control
                 throw;
             }
 
+            var Tr = 1.0 / motor.PwmFreq_Hz; //Sampling theorem?
+
             while (true)
             {
-                
+                System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+                if (sw.Elapsed.TotalSeconds >= Tr)
+                {
+                    
+                    sw.Reset();
+                }
             }
         }
         double[] GetC1Controller(double[] KalmanGain, MotorModel m)
