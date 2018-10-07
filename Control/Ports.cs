@@ -31,15 +31,6 @@ namespace Control
             throw new NotImplementedException();
         }
 
-        private void Senddoublearray_AsFloat(double[] a)
-        {
-            foreach (var item in a)
-            {
-                var tmp = BitConverter.GetBytes((float)item);
-                s.Write(tmp, 0, tmp.Length);
-            }
-        }
-
         public bool Polling()
         {
             //TODO:
@@ -55,20 +46,50 @@ namespace Control
             }
         }
 
-        public bool WriteMatrix(double[] mat, char prefix)
+        private byte[] Compose(double[] mat, char prefix)
         {
             //TODO:
-            if (s.IsOpen)
+            byte row, column;
+            switch (prefix)         
             {
-                s.Write(prefix.ToString());
-                this.Senddoublearray_AsFloat(mat);
-                return true;
+                case 'a':
+                    row = 3; column = 3;
+                    break;
+                default:
+                    row = 0; column = 0;
+                    break;
             }
-            else
-            {
-                return false;
-            }
+            //Write header
+            var size = 6 + 4 * (row * column);
+            byte[] packet = new byte[size];
+            packet[0] = 0xFF;
+            var szbyte = BitConverter.GetBytes((ushort)size);
+            packet[1] = szbyte[0];
+            packet[2] = szbyte[1];
+            packet[3] = (byte)prefix;
+            packet[4] = row;
+            packet[5] = column;
+            var offset = 6;
 
+            //Write data
+            foreach (var item in mat)
+            {
+                var u_data = BitConverter.GetBytes((float)item);
+                packet[offset + 0] = u_data[0];
+                packet[offset + 1] = u_data[1];
+                packet[offset + 2] = u_data[2];
+                packet[offset + 3] = u_data[3];
+                offset += 4;
+            }
+            return packet;
+        }
+        public void WriteMatrix(double[] mat, char prefix)
+        {
+            if (this.s.IsOpen)
+            {
+                var bytes = this.Compose(mat, prefix);
+                this.s.Write(bytes, 0, bytes.Length);
+            }
         }
     }
 }
