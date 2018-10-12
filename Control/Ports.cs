@@ -55,6 +55,21 @@ namespace Control
                 case 'a':
                     row = 3; column = 3;
                     break;
+                case 'b':
+                    row = 3; column = 4;
+                    break;
+                case 'c':
+                    row = 1;column = 3;
+                    break;
+                case 'f':
+                    row = 3; column = 4;
+                    break;
+                case 'r':
+                    row = 2; column = 1;
+                    break;
+                case 'V':
+                    row = 8; column = 8;
+                    break;
                 default:
                     row = 0; column = 0;
                     break;

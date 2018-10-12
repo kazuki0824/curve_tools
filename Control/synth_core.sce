@@ -82,6 +82,10 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
 endfunction
 
 function [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V)
+    [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V, 0);
+endfunction
+
+function [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V, Tf)
     Mat = sys_c_p.A;
     intm = [-Mat(1,1)/Mat(1,2) 1/Mat(1,2) ; Mat(2,1) 0]*[velo;accel];
     ref=[v;intm(1)];
