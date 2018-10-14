@@ -16,11 +16,12 @@ namespace Player
         {
             InitializeComponent();
             propertyGrid1.SelectedObject = serialPort1;
+            trackBar1_ValueChanged(this, null);
         }
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)
         {
-            label5.Text = (trackBar1.Value / 100).ToString() + "[rad/s]";
+            label5.Text = string.Format("{0}[rad/s]", (trackBar1.Value / 314.0));
         }
     }
 }
