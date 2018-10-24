@@ -9,6 +9,11 @@ namespace Control
         {
             this.s = new SerialPort(device, 115200, Parity.None);
         }
+        public void RegisterSerialReceiveEvent()
+        {
+            //TODO:
+            throw new NotImplementedException();
+        }
         public bool Connect()
         {
             try
@@ -29,21 +34,6 @@ namespace Control
         void IDisposable.Dispose()
         {
             throw new NotImplementedException();
-        }
-
-        public bool Polling()
-        {
-            //TODO:
-            if (s.IsOpen)
-            {
-                s.Write("2008");
-                var str = s.ReadLine();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
 
         private byte[] Compose(double[] mat, char prefix)
@@ -105,6 +95,11 @@ namespace Control
                 var bytes = this.Compose(mat, prefix);
                 this.s.Write(bytes, 0, bytes.Length);
             }
+        }
+
+        public void ApplyMotor(modeling.Discrete_ss value)
+        {
+
         }
     }
 }

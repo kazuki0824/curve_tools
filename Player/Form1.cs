@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Player
 {
@@ -17,6 +18,10 @@ namespace Player
             InitializeComponent();
             propertyGrid1.SelectedObject = serialPort1;
             trackBar1_ValueChanged(this, null);
+
+            chart1.Series["Rotation"].Points.AddXY(DateTime.Now.ToOADate(),1.22);
+            System.Threading.Thread.Sleep(100);
+            chart1.Series["Rotation"].Points.AddXY(DateTime.Now.ToOADate(), -1);
         }
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)

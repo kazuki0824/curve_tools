@@ -19,6 +19,6 @@ namespace modeling
         public List<double> A { get; set; }
         public List<double> B { get; set; }
         public List<double> C { get; set; }
-
+        public List<double> F { get; set; }
     }
 }
