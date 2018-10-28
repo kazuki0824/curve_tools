@@ -1,0 +1,3 @@
+[submodule "cuParticle"]
+	path = cuParticle
+	url = ../cuParticle.git
