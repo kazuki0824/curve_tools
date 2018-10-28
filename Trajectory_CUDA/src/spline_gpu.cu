@@ -6,7 +6,7 @@
  */
 
 #include "helper_math.h"
-#include "spline_gpu.hpp"
+#include "spline_gpu.hcu"
 #include <stdio.h>
 
 using namespace std;

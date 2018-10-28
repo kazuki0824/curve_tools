@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -7,7 +7,7 @@
 #include <geometry_msgs/Pose.h>
 
 #include "helper_math.h"
-#include "spline_gpu.hpp"
+#include "spline_gpu.hcu"
 #include <vector>
 #include <GL/freeglut.h>
 #include "ferguson_coons_gpu.hcu"
