@@ -86,7 +86,7 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr pose)
 	glutPostRedisplay();
 }
 
-void poseCallback(const geometry_msgs::Twist::ConstPtr pose)
+void encoderCallback(const geometry_msgs::Twist::ConstPtr pose)
 {
 	glutPostRedisplay();
 }
@@ -128,8 +128,8 @@ int main(int argc, char **argv) {
 	puts("Initializing ROS-related functions...");
 	signal(SIGINT, mySigintHandler);
 	//TODO:
-	//ros::Subscriber s = nh.subscribe("robot_pose",100, poseCallback);
-	//ros::Subscriber s = nh.subscribe("robot_encoder",100, poseCallback);
+	ros::Subscriber s_pose = nh.subscribe("robot_pose",100, poseCallback);
+	ros::Subscriber s_twist = nh.subscribe("robot_encoder",100, encoderCallback);
 
 	glutMainLoop();
 	return 0;
