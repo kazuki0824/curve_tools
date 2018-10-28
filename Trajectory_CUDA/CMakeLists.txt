@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(cu_particle)
+project(trajectory)
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
 
@@ -8,6 +8,11 @@ find_package(
   roscpp
   std_msgs
 )
+
+
+#OpenGL
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 # Boost
 find_package(Boost 1.54 REQUIRED)
@@ -26,9 +31,11 @@ catkin_package(
 
 include_directories(
   ${PROJECT_SOURCE_DIR}/inc
+  ${OpenGL_INCLUDE_DIR}
+  ${GLUT_INCLUDE_DIR}
   ${CATKIN_INCLUDE_DIRS}
   ${CUDA_INCLUDE_DIRS}
-  /opt/ros/melodic/include
+  ${CMAKE_PREFIX_PATH}/include
 )
 
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_60,code=sm_60 -O3 --use_fast_math -std=c++11")
@@ -38,7 +45,7 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 #???
 set_directory_properties( PROPERTIES COMPILE_DEFINITIONS "" )
 
-cuda_add_executable(cu_particle_node
+cuda_add_executable(traj_node
   src/main.cpp
   src/spline_gpu.cu
   src/ferguson_coons_gpu.cu
@@ -46,9 +53,11 @@ cuda_add_executable(cu_particle_node
   src/MPC.cu
 )
 
-cuda_add_cublas_to_target(cu_particle_node)
+cuda_add_cublas_to_target(traj_node)
 
-target_link_libraries(cu_particle_node
+target_link_libraries(traj_node
+ ${OPENGL_LIBRARIES}
+ ${GLUT_LIBRARY}
  ${catkin_LIBRARIES}
  ${CUDA_LIBRARIES}
  ${CUDA_cusparse_LIBRARY}

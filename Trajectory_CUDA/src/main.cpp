@@ -61,7 +61,7 @@ void spl() {
 }
 static unsigned char image[1000][1000][3] = {0}; //取り込む画像
 void display() {
-	//ros::spinOnce();
+	ros::spinOnce();
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	glRasterPos2f(-1 , 1); //ずらして
@@ -86,6 +86,11 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr pose)
 	glutPostRedisplay();
 }
 
+void poseCallback(const geometry_msgs::Twist::ConstPtr pose)
+{
+	glutPostRedisplay();
+}
+
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 1.0);   // 背景色　黒
 	cusparseCreate(&cusparsehandle);
@@ -105,10 +110,9 @@ void mySigintHandler(int sig)
 
 int main(int argc, char **argv) {
 
-	/*
 	ros::init(argc,argv,"Trajectory");
 	ros::NodeHandle nh("~");
-*/
+
 	puts("Init OpenGL");
 	glutInitWindowPosition(100, 200);   // ウィンドウ作成時の座標指定
 	glutInitWindowSize(1000, 1000);        // ウィンドウサイズ
@@ -124,7 +128,8 @@ int main(int argc, char **argv) {
 	puts("Initializing ROS-related functions...");
 	signal(SIGINT, mySigintHandler);
 	//TODO:
-	//ros::Subscriber s = nh.subscribe("ros_pose_v",100, poseCallback);
+	//ros::Subscriber s = nh.subscribe("robot_pose",100, poseCallback);
+	//ros::Subscriber s = nh.subscribe("robot_encoder",100, poseCallback);
 
 	glutMainLoop();
 	return 0;
