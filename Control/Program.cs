@@ -18,7 +18,7 @@ namespace Control
                 device = new MotorDriver(args[1]);
 
                 //TODO:Set Fpd, ABCD, and C1
-                var sys_f = call_scilab.getConfig(motor);
+                var sys_f = call_scilab.getInitConfig(motor);
 
             }
             catch (System.Exception)
@@ -41,14 +41,7 @@ namespace Control
                 }
             }
         }
-        double[] GetC1Controller(double[] KalmanGain, MotorModel m)
-        {
-            m_oSCilab.createNamedMatrixOfDouble("Kf", 3, 1, KalmanGain);
-            m_oSCilab.SendScilabJob("[C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)");
-            m_oSCilab.SendScilabJob("X =[C1.A C1.B ; C1.C C1.D];");
-            var C2 = m_oSCilab.readNamedMatrixOfDouble("X");
-            return C2;
-        }
+        
 
         static async void PipeServer(string name)
         {
