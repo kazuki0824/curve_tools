@@ -47,6 +47,7 @@ set_directory_properties( PROPERTIES COMPILE_DEFINITIONS "" )
 
 cuda_add_executable(traj_node
   src/main.cpp
+  src/path_core.cu
   src/spline_gpu.cu
   src/ferguson_coons_gpu.cu
   src/minimum_jerk.cu

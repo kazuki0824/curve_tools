@@ -175,7 +175,7 @@ float d[32] = {4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0,
 
 __host__ void pSpline(float2 points[], pSpline_polynomial f[32] , int pointcount, cusparseHandle_t * handle)
 {
-
+	pointcount &= 0x1F;
 	float2* pts;
 
 	cudaMalloc(&pts, sizeof(float2) * pointcount);
@@ -227,10 +227,6 @@ __host__ void pSpline(float2 points[], pSpline_polynomial f[32] , int pointcount
 	}
 
 #endif
-
-
-	//printf("%x %x %x %x\n",dl_cuda, d_cuda,du_cuda, temp_tdma_v);
-
 
     cusparseStatus_t x = cusparseSgtsv(*handle, pointcount - 1, 2, dl_cuda, d_cuda, du_cuda, temp_tdma_v, pointcount - 1);
 
