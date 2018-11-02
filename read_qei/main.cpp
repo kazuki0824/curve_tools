@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"*/
 
 #include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
 
 #include <termios.h>
 #include <unistd.h>
@@ -15,24 +16,30 @@
 void* th_rx(void* pParam); //受信用スレッド
 void* th_tx(void* pParam); //送信用スレッド
 
+ros::Publisher encoder_pub;
 
- pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
+pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
 //　スレッド内で，   pthread_mutex_lock(&mutex);　　
 //    　           pthread_mutex_unlock(&mutex);
 // の間で排他処理をさせる
 
 int fd = -1;
 
-int main(){
+int main(int argc, char** argv){
 	struct termios tio_old, tio;
 	int ret;
 	char buf[256];
 	pthread_t tid_tx, tid_rx; // Thread IDs
 
+	if(argc < 2)
+	{
+		printf("Open error  : A device must be specified");
+	}
+
 //Device Open
-	fd = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY);
+	fd = open(argv[1], O_RDWR | O_NOCTTY);
 	if(fd < 0){
-		printf("Open error : /dev/ttyUSB1\n");
+		printf("Open error : %s \n", argv[1]);
 		return -1;
 	}
 
@@ -57,7 +64,12 @@ int main(){
 //Create threads
 	pthread_create(&tid_tx, NULL, th_tx, NULL);
 	pthread_create(&tid_rx, NULL, th_rx, NULL);
-  
+
+//ROS Init
+	ros::init(argc, argv, "read_qei");
+	ros::NodeHandle nh("~");
+	ros::Publisher encoder_pub = nh.advertise<geometry_msgs::Twist>("robot_encoder", 100);
+
 //Wait for threads end
 	pthread_join(tid_tx,NULL);
 
@@ -73,18 +85,83 @@ int main(){
 
 
 
-
+const int msgbodysize = 8; //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
 	int ret;
 	char buf[64];
 
 	printf("Rx thread starts\n");
 
+	unsigned int reading_flag = 0;
+	struct mystruct
+	{
+		float velo[3];
+		short int e;
+		float wheels[4];
+	};
+	union
+	{
+		char Byte[30];
+		struct mystruct Body;
+	} u;
 	while(1){
 		ret = read(fd, buf, 1);
 		if(ret > 0){
-			printf("RX:%02x\n",(unsigned char)buf[0]);
+			//1文字読み取れた
+			char r = buf[0];
+			switch (reading_flag)
+			{
+				case 0:
+				{
+					if(r == 0xff)
+					{
+						reading_flag++;
+					}
+					else
+					{
+						reading_flag=0;
+					}
+					break;
+				}
+				case 1:
+				{
+					if(r == '#')
+					{
+						reading_flag++;
+					}
+					else
+					{
+						reading_flag=0;
+					}
+					break;
+				}
+				default:
+				{
+					if(reading_flag < 2 + msgbodysize)
+					{
+						//Body読み取り
+						u.Byte[reading_flag - 2] = r;
+						reading_flag++;
+					}
+					else
+					{
+						if(reading_flag < 2 + msgbodysize)
+						{
+							//TODO: Update UI
+							geometry_msgs::Twist msg;
+							msg.linear.x = u.Body.velo[0];
+							msg.linear.y = u.Body.velo[1];
+							msg.angular.z = u.Body.velo[2];
+							encoder_pub.publish(msg);
+						}
+						reading_flag=0;
+					}
+				}
+			}
 		}
+		else
+			continue;
+		ros::spinOnce();
 	}
 
 //Never comes here!
