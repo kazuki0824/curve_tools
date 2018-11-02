@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.10.2)
 project(read_qei)
+set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
 find_package(
   catkin REQUIRED
@@ -11,6 +12,11 @@ catkin_package(
   roscpp
   std_msgs
 )
+
+#pthread
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
 
 #Qt
 set(CMAKE_AUTOMOC ON)
