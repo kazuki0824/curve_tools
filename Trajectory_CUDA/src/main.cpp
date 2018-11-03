@@ -105,7 +105,7 @@ void display() {
 	glVertex2d(0.0, -1.0);
 	glEnd();
 
-	auto path = getReference(point,6,cusparsehandle);
+	std::vector<pSpline_polynomial> path = getReference(point,6,cusparsehandle);
 	drawReferencePath(path);
 	float whole_time =getMinimumTime(path,10,0.5);
 
