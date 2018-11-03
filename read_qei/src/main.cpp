@@ -1,5 +1,5 @@
-/*#include "mainwindow.h"
-#include "ui_mainwindow.h"*/
+#include "mainwindow.h"
+#include <QApplication>
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
@@ -64,6 +64,13 @@ int main(int argc, char** argv){
 //Create threads
 	pthread_create(&tid_tx, NULL, th_tx, NULL);
 	pthread_create(&tid_rx, NULL, th_rx, NULL);
+
+//User check
+    QApplication app(argc, argv);
+    MainWindow w;
+    w.show();
+    int ui_exitcode = app.exec();
+    //return app.exec();
 
 //ROS Init
 	ros::init(argc, argv, "read_qei");
