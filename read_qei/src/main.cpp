@@ -30,16 +30,22 @@ int main(int argc, char** argv){
 	int ret;
 	char buf[256];
 	pthread_t tid_tx, tid_rx; // Thread IDs
-
+    char default_device[256] = "/dev/ttyACM0";
+    char * device = NULL;
 	if(argc < 2)
 	{
-		printf("Open error  : A device must be specified");
+        printf("Open warning  : A device should be specified. Assume '/dev/ttyACM0'\n");
+        device = default_device;
 	}
+    else
+    {
+        device = argv[1];
+    }
 
 //Device Open
-	fd = open(argv[1], O_RDWR | O_NOCTTY);
+    fd = open(device, O_RDWR | O_NOCTTY);
 	if(fd < 0){
-		printf("Open error : %s \n", argv[1]);
+        printf("Open error : %s \n", device);
 		return -1;
 	}
 
@@ -78,7 +84,12 @@ int main(int argc, char** argv){
 	ros::Publisher encoder_pub = nh.advertise<geometry_msgs::Twist>("robot_encoder", 100);
 
 //Wait for threads end
-	pthread_join(tid_tx,NULL);
+    struct timespec ts;
+    ts.tv_nsec += 1000000;
+    do
+    {
+        ros::spinOnce();
+    }while(pthread_timedjoin_np(tid_tx, NULL, &ts)!=0);
 
 	pthread_cancel( tid_rx );
 	pthread_join(tid_rx,NULL);
@@ -167,8 +178,7 @@ void* th_rx(void* pParam){
 			}
 		}
 		else
-			continue;
-		ros::spinOnce();
+            continue;
 	}
 
 //Never comes here!
