@@ -145,7 +145,7 @@ void* th_rx(void* pParam){
 					}
 					else
 					{
-						if(reading_flag < 2 + msgbodysize)
+						if(reading_flag == 2 + msgbodysize)
 						{
 							//TODO: Update UI
 							geometry_msgs::Twist msg;
