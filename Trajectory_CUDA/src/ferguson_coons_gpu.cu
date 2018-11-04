@@ -6,10 +6,9 @@
  */
 
 
-#include <stdio.h>
 #include "helper_math.h"
 
-#include "spline_gpu.hpp"
+#include "spline_gpu.hcu"
 
 #include "ferguson_coons_gpu.hcu"
 

@@ -42,7 +42,6 @@
 								<option id="nvcc.linker.option.libs.582624917" name="Libraries (-l)" superClass="nvcc.linker.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="roscpp"/>
 									<listOptionValue builtIn="false" value="cusparse"/>
-									<listOptionValue builtIn="false" value="glut"/>
 									<listOptionValue builtIn="false" value="cublas"/>
 								</option>
 								<option id="nvcc.linker.option.paths.776779081" name="Library search path (-L)" superClass="nvcc.linker.option.paths" valueType="libPaths">
@@ -113,7 +112,6 @@
 							</tool>
 							<tool id="nvcc.linker.base.416233332" name="NVCC Linker" superClass="nvcc.linker.base">
 								<option id="nvcc.linker.option.libs.684010961" name="Libraries (-l)" superClass="nvcc.linker.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="glut"/>
 									<listOptionValue builtIn="false" value="cusparse"/>
 									<listOptionValue builtIn="false" value="cublas"/>
 									<listOptionValue builtIn="false" value="roscpp"/>
