@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     poll = new QTimer(this);
-    connect(poll,SIGNAL(timeout()), this, SLOT(update()));
+    connect(poll,SIGNAL(timeout()), this, SLOT(update_value()));
     poll->start(100);
 }
 
