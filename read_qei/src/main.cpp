@@ -61,7 +61,7 @@ int main(int argc, char** argv){
 
     cfsetispeed( &tio, baudRate );
     cfsetospeed( &tio, baudRate );
-    tio.c_cc[VTIME] = 0;
+    tio.c_cc[VTIME] = 1;
     tio.c_cc[VMIN] = 32;
     //tio.c_cc[VMIN] = 1;
 
@@ -133,7 +133,7 @@ void* th_rx(void* pParam){
         ret = read(fd, buf, 32);
         if(ret == 32){
             //1文字読み取れた
-            char* buf_ptr = (char*)memchr(buf, -1, 32);
+            char* buf_ptr = (char*)memchr(buf, '#', 32);
             if (buf_ptr ==NULL)
             {
                 continue;
@@ -141,10 +141,13 @@ void* th_rx(void* pParam){
             else if (buf_ptr[1] == '#')
             {
                 int rest = buf_ptr-buf;
-                do
+                if(rest!=0)
                 {
-                    ret = read(fd, &buf[32], rest);
-                } while (ret <= 0);
+                    do
+                    {
+                        ret = read(fd, &buf[32], rest);
+                    } while (ret <= 0);
+                }
                 memcpy(u.Byte,&buf_ptr[2],30);
                 msg.linear.x = u.Body.velo[0];
                 msg.linear.y = u.Body.velo[1];
@@ -163,7 +166,9 @@ void* th_rx(void* pParam){
         else
             continue;
     }
-	while(1){
+
+    /*
+    while(1){
         ret = read(fd, buf, 32);
 		if(ret > 0){
 			//1文字読み取れた
@@ -172,7 +177,7 @@ void* th_rx(void* pParam){
 			{
 				case 0:
 				{
-					if(r == 0xff)
+                    if(r == '#')
 					{
 						reading_flag++;
 					}
@@ -222,6 +227,7 @@ void* th_rx(void* pParam){
 		else
             continue;
 	}
+    */
 
 //Never comes here!
 	printf("Rx thread ends\n");	
