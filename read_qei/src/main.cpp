@@ -27,7 +27,8 @@ pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
 int fd = -1;
 
 int main(int argc, char** argv){
-	struct termios tio_old, tio;
+    struct termios tio_old, tio;
+    speed_t baudRate =115200;
 	int ret;
 	char buf[256];
 	pthread_t tid_tx, tid_rx; // Thread IDs
@@ -47,25 +48,26 @@ int main(int argc, char** argv){
     fd = open(device, O_RDWR | O_NOCTTY);
 	if(fd < 0){
         printf("Open error : %s \n", device);
-		return -1;
+        return fd;
 	}
 
-	tcgetattr(fd, &tio_old);
-	bzero(&tio, sizeof(tio));
+    cfmakeraw(&tio);                    // RAWモード
+    tcgetattr(fd, &tio_old);
+    tio.c_cflag += CREAD;               // 受信有効
+    tio.c_cflag += CLOCAL;              // ローカルライン（モデム制御なし）
+    tio.c_cflag += CS8;                 // データビット:8bit
+    tio.c_cflag += 0;                   // ストップビット:1bit
+    tio.c_cflag += 0;                   // パリティ:None
 
-	tio.c_cflag = B1000000 | CS8 | CLOCAL | CREAD;
-	//tio[0].c_oflag = 0;
-	//tio[0].c_lflag = ICANON;
+    cfsetispeed( &tio, baudRate );
+    cfsetospeed( &tio, baudRate );
+    tio.c_cc[VTIME] = 0;
+    tio.c_cc[VMIN] = 32;
+    //tio.c_cc[VMIN] = 1;
 
-	tio.c_iflag = IGNPAR;	//ignore parity error
-	tio.c_oflag = 0;
-	tio.c_lflag = 0;
+    //tcflush(fd, TCIFLUSH);
+    tcsetattr( fd, TCSANOW, &tio );     // デバイスに設定を行う
 
-	tio.c_cc[VTIME] = 0;
-	tio.c_cc[VMIN] = 1;
-
-	tcflush(fd, TCIFLUSH);
-	tcsetattr(fd, TCSANOW, &tio);
 //Device Open (finish)
 
 //Create threads
@@ -105,12 +107,12 @@ int main(int argc, char** argv){
 
 
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-float wheels[4] ={0};
+float wheels[4] ={0.1};
 geometry_msgs::Twist msg;
 const int msgbodysize = 8; //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
 	int ret;
-	char buf[64];
+    char buf[64] ={0};
 
 	printf("Rx thread starts\n");
 
@@ -126,8 +128,43 @@ void* th_rx(void* pParam){
 		char Byte[30];
 		struct mystruct Body;
 	} u;
+    while(1){
+        usleep(1000);
+        ret = read(fd, buf, 32);
+        if(ret == 32){
+            //1文字読み取れた
+            char* buf_ptr = (char*)memchr(buf, -1, 32);
+            if (buf_ptr ==NULL)
+            {
+                continue;
+            }
+            else if (buf_ptr[1] == '#')
+            {
+                int rest = buf_ptr-buf;
+                do
+                {
+                    ret = read(fd, &buf[32], rest);
+                } while (ret <= 0);
+                memcpy(u.Byte,&buf_ptr[2],30);
+                msg.linear.x = u.Body.velo[0];
+                msg.linear.y = u.Body.velo[1];
+                msg.angular.z = u.Body.velo[2];
+                for (int k = 0; k<4;k++)
+                {
+                    wheels[k]=u.Body.wheels[k];
+                }
+                if(isROS)
+                {
+                    encoder_pub.publish(msg);
+                }
+            }
+
+        }
+        else
+            continue;
+    }
 	while(1){
-		ret = read(fd, buf, 1);
+        ret = read(fd, buf, 32);
 		if(ret > 0){
 			//1文字読み取れた
 			char r = buf[0];
