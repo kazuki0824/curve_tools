@@ -16,6 +16,7 @@
 void* th_rx(void* pParam); //受信用スレッド
 void* th_tx(void* pParam); //送信用スレッド
 
+static bool isROS =false;
 ros::Publisher encoder_pub;
 
 pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
@@ -25,6 +26,7 @@ pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
 
 int fd = -1;
 
+MainWindow w;
 int main(int argc, char** argv){
 	struct termios tio_old, tio;
 	int ret;
@@ -73,7 +75,6 @@ int main(int argc, char** argv){
 
 //User check
     QApplication app(argc, argv);
-    MainWindow w;
     w.show();
     int ui_exitcode = app.exec();
     //return app.exec();
@@ -81,7 +82,8 @@ int main(int argc, char** argv){
 //ROS Init
 	ros::init(argc, argv, "read_qei");
 	ros::NodeHandle nh("~");
-	ros::Publisher encoder_pub = nh.advertise<geometry_msgs::Twist>("robot_encoder", 100);
+    encoder_pub = nh.advertise<geometry_msgs::Twist>("robot_encoder", 100);
+    isROS = true;
 
 //Wait for threads end
     struct timespec ts;
@@ -102,7 +104,9 @@ int main(int argc, char** argv){
 }
 
 
-
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+float wheels[4] ={0};
+geometry_msgs::Twist msg;
 const int msgbodysize = 8; //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
 	int ret;
@@ -163,14 +167,15 @@ void* th_rx(void* pParam){
 					}
 					else
 					{
-						if(reading_flag == 2 + msgbodysize)
-						{
-							//TODO: Update UI
-							geometry_msgs::Twist msg;
-							msg.linear.x = u.Body.velo[0];
-							msg.linear.y = u.Body.velo[1];
-							msg.angular.z = u.Body.velo[2];
-							encoder_pub.publish(msg);
+                        if(reading_flag == 2 + msgbodysize)
+                        {
+                            msg.linear.x = u.Body.velo[0];
+                            msg.linear.y = u.Body.velo[1];
+                            msg.angular.z = u.Body.velo[2];
+                            if(isROS)
+                            {
+                                encoder_pub.publish(msg);
+                            }
 						}
 						reading_flag=0;
 					}
