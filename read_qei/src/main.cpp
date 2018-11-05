@@ -26,7 +26,6 @@ pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
 
 int fd = -1;
 
-MainWindow w;
 int main(int argc, char** argv){
 	struct termios tio_old, tio;
 	int ret;
@@ -75,6 +74,7 @@ int main(int argc, char** argv){
 
 //User check
     QApplication app(argc, argv);
+    MainWindow w;
     w.show();
     int ui_exitcode = app.exec();
     //return app.exec();
