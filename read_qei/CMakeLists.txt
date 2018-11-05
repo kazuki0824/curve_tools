@@ -30,6 +30,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/src
   ${CATKIN_INCLUDE_DIRS}
   ${CMAKE_PREFIX_PATH}/include
+  /usr/include/qwt
 )
 
 file(GLOB_RECURSE CPP_FILES src/*.cpp)
@@ -45,5 +46,6 @@ add_executable(qei_node
 
 target_link_libraries(qei_node
  ${catkin_LIBRARIES}
+ qwt-qt5
 )
 QT5_USE_MODULES(qei_node Widgets)
