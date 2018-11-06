@@ -28,7 +28,7 @@ int fd = -1;
 
 int main(int argc, char** argv){
     struct termios tio_old, tio;
-    speed_t baudRate =115200;
+    speed_t baudRate = B115200;
 	int ret;
 	char buf[256];
 	pthread_t tid_tx, tid_rx; // Thread IDs
