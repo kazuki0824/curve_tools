@@ -130,8 +130,10 @@ void* th_rx(void* pParam){
 	} u;
     while(1){
         usleep(1000);
+        memset(buf,0,64);
         ret = read(fd, buf, 32);
-        if(ret == 32){
+        if(ret == 32)
+        {
             //1文字読み取れた
             char* buf_ptr = (char*)memchr(buf, '#', 32);
             if (buf_ptr ==NULL)
@@ -161,7 +163,6 @@ void* th_rx(void* pParam){
                     encoder_pub.publish(msg);
                 }
             }
-
         }
         else
             continue;
