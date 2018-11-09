@@ -157,7 +157,9 @@ void* th_rx(void* pParam){
                 for (int k = 0; k<4;k++)
                 {
                     wheels[k]=u.Body.wheels[k];
+		    printf("%f,", u.Body.wheels[k]);
                 }
+		printf("\n");
                 if(isROS)
                 {
                     encoder_pub.publish(msg);
@@ -242,7 +244,7 @@ void* th_tx(void* pParam){
 	int val;
 	
 	printf("Tx thread starts\n");
-	printf("(Type 'e' for exit)\n");
+	printf("(Type 'e'+ Enter for exit)\n");
 
 	while(1){
 		fgets(buf, 64, stdin);
