@@ -56,6 +56,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS_STR}")
 
 add_executable(${PROJECT_NAME}_node src/control_server_node.cpp src/sci_bridge.c)
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS}) #necessary for message generation
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
