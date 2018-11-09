@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.10.2)
 project(read_qei)
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
+add_compile_options(-std=c++11)
+
 find_package(
   catkin REQUIRED
   roscpp

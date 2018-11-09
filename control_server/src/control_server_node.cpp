@@ -7,9 +7,9 @@
 #include "ros/ros.h"
 #include "control_server/reference.h"
 #include "control_server/C1.h"
-
+extern "C" {
 #include "sci_bridge.h"
-
+}
 
 bool Tuning(control_server::C1::Request &req, control_server::C1::Response &res)
 {

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(control_server)
 
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -8,7 +9,7 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp message_generation std_msgs)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(scilab601 REQUIRED scilab)
+pkg_check_modules(scilab REQUIRED scilab)
 
 ## Generate services in the 'srv' folder
 add_service_files(
@@ -43,19 +44,24 @@ catkin_package(
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${CATKIN_INCLUDE_DIRS}
-  ${scilab601_INCLUDE_DIRS}
+  ${scilab_INCLUDE_DIRS}
   ${CMAKE_PREFIX_PATH}/include
 )
 
-string (REPLACE ";" " " LD_FLAGS_STR "${scilab601_LDFLAGS} -lsciconsole")
-Message("${LD_FLAGS_STR}")
-set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS_STR}")
+set(CMAKE_INSTALL_RPATH "/usr/lib/scilab") 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) 
+
+#string (REPLACE ";" " " LD_FLAGS_STR "-L/usr/lib/scilab;-lscilab-cli;-lscicall_scilab")
+#Message("${LD_FLAGS_STR}")
+#set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS_STR}")
 
 add_executable(${PROJECT_NAME}_node src/control_server_node.cpp src/sci_bridge.c)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
+   /usr/lib/scilab/libscicall_scilab.so
+   /usr/lib/scilab/libscilab-cli.so
 )
 
 #############
