@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(control_server)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_VERBOSE_MAKEFILE FALSE)
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
