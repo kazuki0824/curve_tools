@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 
 	ros::spin();
 
+	deinit_sci();
 	return 0;
 }
 

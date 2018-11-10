@@ -8,6 +8,7 @@
 #ifndef SCI_BRIDGE_H_
 #define SCI_BRIDGE_H_
 
-int init_sci();
+int init_sci(char* scriptPath);
+int deinit_sci();
 
 #endif /* SCI_BRIDGE_H_ */
