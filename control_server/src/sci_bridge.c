@@ -48,6 +48,7 @@ int read_example()
 
     /* Load the previously set variable A */
     {
+        void* pvApiCtx = NULL;
         int rowA_ = 0, colA_ = 0, lp = 0;
         int i = 0, j = 0;
         double *matrixOfDouble = NULL;
