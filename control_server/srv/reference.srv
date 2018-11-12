@@ -1,4 +1,6 @@
-int64 a
-int64 b
+Float32 velo
+Float32 accel
+Float32 V
+Float32 Tf
 ---
-int64 sum
+Float32Multiarray ref_

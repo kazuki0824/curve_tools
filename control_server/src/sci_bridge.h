@@ -10,5 +10,10 @@
 
 int init_sci(char* scriptPath);
 int deinit_sci();
+double * read_matrix(const char variableToBeRetrieved[], int * rowCount, int * colCount)
+
+int process_ref(double velo, double accel, double V,double Tf)
+
+int Init_MotorModel();
 
 #endif /* SCI_BRIDGE_H_ */

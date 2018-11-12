@@ -28,7 +28,7 @@ namespace Control
             var cmd = string.Format("[sys_c_p, sys_u_p, sys_u, sys_f]=Motor(24,{0},{1},{2},{3},{4},{5});", 0, motor.Inertial_load, motor.K, motor.Resistance, motor.Inductance, 1.0 / motor.PwmFreq_Hz);
             m_oSCilab.SendScilabJob(cmd);
 
-            m_oSCilab.SendScilabJob("[Fpd, f_u, Ap, Bp]=getFpd(2.0,1.0);");
+            m_oSCilab.SendScilabJob("[Fpd, f_u, Ap, Bp]=getFpd(%F,%f);", current_weight, input_weight);
             var F = m_oSCilab.readNamedMatrixOfDouble("Fpd");
 
 
