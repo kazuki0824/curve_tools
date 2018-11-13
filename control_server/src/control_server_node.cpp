@@ -14,7 +14,7 @@ extern "C" {
 bool Tuning(control_server::C1::Request &req, control_server::C1::Response &res)
 {
   //res.sum = req.a + req.b;
-
+  process_C1(req.Kf.data[0],req.Kf.data[1],req.Kf.data[2]);
   return true;
 }
 

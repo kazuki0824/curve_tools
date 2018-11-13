@@ -62,6 +62,19 @@ int process_ref(double velo, double accel, double V,double Tf)
     SendScilabJob(JobString);
 }
 
+int process_C1(double Kf[3])
+{
+    char JobString[100];
+
+    sprintf(JobString, "Kf = [%f;%f;%f]" , Kf[0], Kf[1], Kf[2]);
+    SendScilabJob(JobString);
+
+    sprintf(JobString, "[C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)" , velo, accel ,V, Tf);
+    SendScilabJob(JobString);
+
+    //TODO: read C1
+}
+
 double * read_matrix(const char variableToBeRetrieved[], int * rowCount, int * colCount)
 {
 	/******************************** READ ****************************/
