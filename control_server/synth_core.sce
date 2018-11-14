@@ -78,7 +78,8 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     Fp=(eye(4,4)-F_x*Bp)\F_x*Ap;
     Apd=[Ak(1:2,3) ; Ak(4:5,3)];
     Fd = -Bp\Apd
-    Fpd=[Fp Fd*0.05]
+    Fpd=[Fp Fd]
+//    Fpd=[Fp Fd*0.05]
 endfunction
 
 function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V)
@@ -122,6 +123,11 @@ function simulation_triangle(duration , magn)
     
     realX_for_graph=[0;0;0];
     x_est_for_graph=[0;0;0];
+    
+    u_for_graph=[0];//frame average input
+    
+    U1_for_graph=[0];
+    U2_for_graph=[0];
     i=0
     tmp1=zeros(3,4);
     for time=0:sys_f.dt:duration
@@ -137,9 +143,7 @@ function simulation_triangle(duration , magn)
         //C2
         u2=Fpd*x_est;
         
-        //TODO: Saturation
         U=u1+u2;
-        /*
         for j=1:4
             if(U(j) < -1) then
                 U(j) = -1;
@@ -147,13 +151,14 @@ function simulation_triangle(duration , magn)
                 U(j) = 1;
             end
         end
-        */
         u=(U(4)+U(3)+U(2)+U(1))/4;
         [X,tmp1]=ltitr(sys_u.A,sys_u.B,U',X)
-        realX_for_graph(1:3,4*i+1:4*(i+1))=tmp1
-        x_est_for_graph(1:3,1+(4*i):4*(i+1))=[x_est x_est x_est x_est ]
+        realX_for_graph(1:3,4*i+1:4*(i+1))=tmp1;
+        x_est_for_graph(1:3,1+(4*i):4*(i+1))=[x_est x_est x_est x_est ];
+        U1_for_graph(1:1,1+(4*i):4*(i+1))=u1
+        U2_for_graph(1:1,1+(4*i):4*(i+1))=u2
                 i=i+1;
-            
+        u_for_graph(1,i)=u;
         //Observer
         y=sys_u.C*X;
         x_est=sys_f.A*x_est+sys_f.B*U+Kf*(sys_f.C*x_est-y)
@@ -161,8 +166,19 @@ function simulation_triangle(duration , magn)
     count= size(realX_for_graph)(2)
     t_axis=0:sys_f.dt/4:(sys_f.dt/4)*(count-1);
     //reference=cos(2*%pi*(f0*t_axis+k*(t_axis^2)/2))*magn;
-    reference=magn*(1-2*abs(round(t_axis/2)-t_axis/2));
+    reference=magn*(1-2*abs(round(t_axis/4)-t_axis/4));
+    scf();
     plot2d(t_axis, [realX_for_graph(1,:)'  reference' ]);
     scf();
-    plot2d(t_axis, [ x_est_for_graph'])
+    plot2d(t_axis, [realX_for_graph(1,:)' x_est_for_graph(1,:)' ])
+    scf();
+    plot2d(t_axis, [realX_for_graph(2,:)' x_est_for_graph(2,:)' ])
+    scf();
+    plot2d(t_axis, [realX_for_graph(3,:)' x_est_for_graph(3,:)' ])
+    scf();
+    plot2d(t_axis, U1_for_graph')
+    scf();
+    plot2d(t_axis, U2_for_graph')
+    scf();
+    plot2d(u_for_graph')
 endfunction
