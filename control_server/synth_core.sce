@@ -78,8 +78,8 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     Fp=(eye(4,4)-F_x*Bp)\F_x*Ap;
     Apd=[Ak(1:2,3) ; Ak(4:5,3)];
     Fd = -Bp\Apd
-    Fpd=[Fp Fd]
-//    Fpd=[Fp Fd*0.05]
+//    Fpd=[Fp Fd]
+    Fpd=[Fp Fd*0.05]
 endfunction
 
 function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V)
