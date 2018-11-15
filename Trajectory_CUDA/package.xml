@@ -24,11 +24,15 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>base_control</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>base_control</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>cu_particle</exec_depend>
+  <exec_depend>read_qei</exec_depend>
+  <exec_depend>base_control</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

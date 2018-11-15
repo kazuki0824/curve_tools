@@ -8,11 +8,10 @@ find_package(
   catkin REQUIRED
   roscpp
   std_msgs
+  geometry_msgs
 )
 catkin_package(
   CATKIN_DEPENDS
-  roscpp
-  std_msgs
 )
 
 #pthread

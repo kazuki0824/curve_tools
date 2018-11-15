@@ -7,6 +7,9 @@ find_package(
   catkin REQUIRED
   roscpp
   std_msgs
+  cu_particle
+  read_qei
+  base_control
 )
 
 
