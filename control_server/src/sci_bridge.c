@@ -60,6 +60,7 @@ int process_ref(double velo, double accel, double V,double Tf)
     char JobString[100];
     sprintf(JobString, "[ref, Idot]=calculate_ref(%f, %f, sys_c_p ,%f, %f)" , velo, accel ,V, Tf);
     SendScilabJob(JobString);
+    return 0;
 }
 
 int process_C1(double Kf[3])
@@ -69,7 +70,7 @@ int process_C1(double Kf[3])
     sprintf(JobString, "Kf = [%f;%f;%f]" , Kf[0], Kf[1], Kf[2]);
     SendScilabJob(JobString);
 
-    sprintf(JobString, "[C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)" , velo, accel ,V, Tf);
+    sprintf(JobString, "[C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)" );
     SendScilabJob(JobString);
 
     //TODO: read C1
@@ -95,7 +96,8 @@ double * read_matrix(const char variableToBeRetrieved[], int * rowCount, int * c
         }
 
         /* Alloc the memory */
-        matrixOfDouble = (double*)malloc((rowA_ * colA_) * sizeof(double));
+        double * matrixOfDouble = (double*)malloc((rowA_ * colA_) * sizeof(double));
+        if(matrixOfDouble ==NULL) return NULL;
 
         /* Load the matrix */
         sciErr = readNamedMatrixOfDouble(pvApiCtx, variableToBeRetrieved, &rowA_, &colA_, matrixOfDouble);

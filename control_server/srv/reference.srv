@@ -1,6 +1,6 @@
-Float32 velo
-Float32 accel
-Float32 V
-Float32 Tf
+float32 velo
+float32 accel
+float32 V
+float32 Tf
 ---
-Float32Multiarray ref_
+std_msgs/Float32MultiArray ref_

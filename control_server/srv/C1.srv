@@ -1,5 +1,6 @@
-Float32Multiarray Kf
+std_msgs/Float32MultiArray Kf
 ---
-Float32Multiarray C1_A
-Float32Multiarray C1_B
-Float32Multiarray C1_C
+std_msgs/Float64MultiArray C1_A
+std_msgs/Float64MultiArray C1_B
+std_msgs/Float64MultiArray C1_C
+std_msgs/Float64MultiArray C1_D
