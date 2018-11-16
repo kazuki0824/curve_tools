@@ -95,11 +95,14 @@ endfunction
 
 function [Fpd,Kf,C1]=setenv_motor()
     E=24
-    [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E, 0, 0.001020237876, 0.008, 0.485, 72.3/(10^6), 1/343)
+    [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E, 0.01, 0.001020237876, 0.008, 0.485, 72.3/(10^6), 1/343/2)
     [Fpd, f_u, Ap, Bp]=getFpd(50,1)
     Kf=[-0.8484928;0.0139644;-0.0131325]
-    
     [C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)
+
+    time=0:sys_u_p.dt:2
+    plot2d(time',flts(ones(1,size(time)(2)),sys_u_p)')
+
 endfunction
 
 function simulation_triangle(duration , magn)
@@ -124,7 +127,6 @@ function simulation_triangle(duration , magn)
     realX_for_graph=[0;0;0];
     x_est_for_graph=[0;0;0];
     
-    u_for_graph=[0];//frame average input
     
     U1_for_graph=[0];
     U2_for_graph=[0];
@@ -145,12 +147,13 @@ function simulation_triangle(duration , magn)
         
         U=u1+u2;
         for j=1:4
-            if(U(j) < -1) then
-                U(j) = -1;
-            elseif (U(j) > 1) then
-                U(j) = 1;
+            if(U(j) < -1.0) then
+                U(j) = -1.0;
+            elseif (U(j) > 1.0) then
+                U(j) = 1.0;
             end
         end
+        
         u=(U(4)+U(3)+U(2)+U(1))/4;
         [X,tmp1]=ltitr(sys_u.A,sys_u.B,U',X)
         /**/
@@ -160,7 +163,6 @@ function simulation_triangle(duration , magn)
         U2_for_graph(1:1,1+(4*i):4*(i+1))=u2
         /**/
                 i=i+1;
-        u_for_graph(1,i)=u;
         //Observer
         y=sys_u.C*X;
         x_est=sys_f.A*x_est+sys_f.B*U+Kf*(sys_f.C*x_est-y)
@@ -170,7 +172,7 @@ function simulation_triangle(duration , magn)
     //reference=cos(2*%pi*(f0*t_axis+k*(t_axis^2)/2))*magn;
     reference=magn*(1-2*abs(round(t_axis/4)-t_axis/4));
     scf();
-    plot2d(t_axis, [realX_for_graph(1,:)'  reference' ]);
+    plot2d(t_axis, [realX_for_graph(1:3,:)'  reference(1,:)' ]);
     scf();
     plot2d(t_axis, [realX_for_graph(1,:)' x_est_for_graph(1,:)' ])
     scf();
@@ -182,9 +184,10 @@ function simulation_triangle(duration , magn)
     scf();
     plot2d(t_axis, U2_for_graph')
     scf();
-    plot2d(u_for_graph')
+    plot2d(t_axis, U1_for_graph'+U2_for_graph')
     
     //間引いて表示
+    /*
     t_new=[0];x_new=[0;0;0];
     for i=1:size(t_axis)(2)
         if (modulo(i,2)==1) then
@@ -193,5 +196,6 @@ function simulation_triangle(duration , magn)
         end
     end
     scf();
-    plot2d(t_axis, x_new')
+    plot2d(t_new, x_new')
+    */
 endfunction
