@@ -78,16 +78,124 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     Fp=(eye(4,4)-F_x*Bp)\F_x*Ap;
     Apd=[Ak(1:2,3) ; Ak(4:5,3)];
     Fd = -Bp\Apd
+//    Fpd=[Fp Fd]
     Fpd=[Fp Fd*0.05]
 endfunction
 
-function [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V)
-    [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V, 0);
+function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V)
+    [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V, 0);
 endfunction
 
-function [ref, Idot]=calculate_ref(x, velo, accel, sys_c_p ,V, Tf)
+function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V, Tf)
     Mat = sys_c_p.A;
     intm = [-Mat(1,1)/Mat(1,2) 1/Mat(1,2) ; Mat(2,1) 0]*[velo;accel];
-    ref=[v;intm(1)];
+    ref=[velo;intm(1)];
     Idot=intm(2)-Mat(2,2)*intm(2,:)-sys_c_p.B(2,:)*V;
+endfunction
+
+function [Fpd,Kf,C1]=setenv_motor()
+    E=24
+    [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E, 0.01, 0.001020237876, 0.008, 0.485, 72.3/(10^6), 1/343/2)
+    [Fpd, f_u, Ap, Bp]=getFpd(50,1)
+    Kf=[-0.8484928;0.0139644;-0.0131325]
+    [C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)
+
+    time=0:sys_u_p.dt:2
+    plot2d(time',flts(ones(1,size(time)(2)),sys_u_p)')
+
+endfunction
+
+function simulation_triangle(duration , magn)
+    E=24
+    [Fpd,Kf,C1]=setenv_motor()
+    C2=obscont(sys_f,Fpd,Kf)
+    cl=sys_f/.-C2
+    //plzr(cl*C1)
+    
+    //chirp signal
+    f0= 0;//Hz
+    f1=1;//Hz
+    k=(f1-f0)/duration;
+    
+    //simulation
+    X=[0;0;0];
+    x_est=[0;0;0];
+    xC1=[0;0;0;0]
+    xC2=[0;0;0]
+    u=0;
+    
+    realX_for_graph=[0;0;0];
+    x_est_for_graph=[0;0;0];
+    
+    
+    U1_for_graph=[0];
+    U2_for_graph=[0];
+    i=0
+    tmp1=zeros(3,4);
+    for time=0:sys_f.dt:duration
+        //v_ref=cos(2*%pi*(f0*time+k*time*time/2)) * magn;
+        v_ref=magn*(1-2*abs(round(time/4)-time/4));
+        //a_ref=-sin(2*%pi*(f0*time+k*time*time/2))*k*time * magn;
+        a_ref=sign(round(time/4)-time/4)*magn
+        V=E*u;
+        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,V, x_est(3));
+        ref1= (ref2+x_est(1:2,:))/2
+        //C1
+        [u1,xC1]=flts([ref1;ref2], C1, xC1);
+        //C2
+        u2=Fpd*x_est;
+        
+        U=u1+u2;
+        for j=1:4
+            if(U(j) < -1.0) then
+                U(j) = -1.0;
+            elseif (U(j) > 1.0) then
+                U(j) = 1.0;
+            end
+        end
+        
+        u=(U(4)+U(3)+U(2)+U(1))/4;
+        [X,tmp1]=ltitr(sys_u.A,sys_u.B,U',X)
+        /**/
+        realX_for_graph(1:3,4*i+1:4*(i+1))=tmp1;
+        x_est_for_graph(1:3,1+(4*i):4*(i+1))=[x_est x_est x_est x_est ];
+        U1_for_graph(1:1,1+(4*i):4*(i+1))=u1
+        U2_for_graph(1:1,1+(4*i):4*(i+1))=u2
+        /**/
+                i=i+1;
+        //Observer
+        y=sys_u.C*X;
+        x_est=sys_f.A*x_est+sys_f.B*U+Kf*(sys_f.C*x_est-y)
+    end
+    count= size(realX_for_graph)(2)
+    t_axis=0:sys_f.dt/4:(sys_f.dt/4)*(count-1);
+    //reference=cos(2*%pi*(f0*t_axis+k*(t_axis^2)/2))*magn;
+    reference=magn*(1-2*abs(round(t_axis/4)-t_axis/4));
+    scf();
+    plot2d(t_axis, [realX_for_graph(1:3,:)'  reference(1,:)' ]);
+    scf();
+    plot2d(t_axis, [realX_for_graph(1,:)' x_est_for_graph(1,:)' ])
+    scf();
+    plot2d(t_axis, [realX_for_graph(2,:)' x_est_for_graph(2,:)' ])
+    scf();
+    plot2d(t_axis, [realX_for_graph(3,:)' x_est_for_graph(3,:)' ])
+    scf();
+    plot2d(t_axis, U1_for_graph')
+    scf();
+    plot2d(t_axis, U2_for_graph')
+    scf();
+    plot2d(t_axis, U1_for_graph'+U2_for_graph')
+    
+    //間引いて表示
+    /*
+    t_new=[0];x_new=[0;0;0];
+    for i=1:size(t_axis)(2)
+        if (modulo(i,2)==1) then
+            t_new(:,ceil(i/2))= t_axis(:,i)
+            x_new(:,ceil(i/2))= realX_for_graph(:,i)
+        end
+    end
+    scf();
+    plot2d(t_new, x_new')
+    */
 endfunction
