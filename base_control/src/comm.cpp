@@ -1,6 +1,9 @@
 #include <vector>
 #include "comm.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+
 int rawSerialport::readChar(char * character)
 {
     return read(fd, character, 1);

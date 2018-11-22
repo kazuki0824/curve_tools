@@ -14,6 +14,6 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    rawSerialport motors[4];
+    //rawSerialport motors[4];
 
 }
