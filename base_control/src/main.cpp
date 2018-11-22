@@ -7,12 +7,14 @@
 
 #include <ros/ros.h>
 #include <iostream>
-#include <termios.h>
+#include "comm.h"
 
 using namespace std;
 
 
-int main()
+int main(int argc, char** argv)
 {
 	
+
+
 }
