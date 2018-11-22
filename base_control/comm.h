@@ -13,7 +13,7 @@ public:
     rawSerialport(char* deviceName);
     ~rawSerialport();
     
-    int readChar(char * character)
+    int readChar(char * character);
     bool isErr;
     int ErrNo;
 };
