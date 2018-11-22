@@ -1,5 +1,4 @@
 #include <vector>
-#include <termios.h>
 #include "comm.h"
 
 int rawSerialport::readChar(char * character)
