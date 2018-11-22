@@ -15,7 +15,7 @@ public:
     rawSerialport(char* deviceName);
     ~rawSerialport();
     
-    int tryReadMsg(char character[MD_Msg_Size])
+    int tryReadMsg(char character[MD_Msg_Size]);
     bool isErr;
     int ErrNo;
 };
