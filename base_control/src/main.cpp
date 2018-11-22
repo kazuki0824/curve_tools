@@ -14,6 +14,16 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    //rawSerialport motors[4];
+    vector<rawSerialport> motors;
+
+    if(argc<=4)
+    {
+        cout << "fail" << endl;
+    }
+    for(size_t i = 1; i <= 4; i++)
+    {
+        rawSerialport a(argv[i]);
+        motors.push_back(a);
+    }
 
 }

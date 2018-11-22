@@ -5,9 +5,9 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int rawSerialport::readChar(char * character)
+int rawSerialport::tryReadMsg(char character[MD_Msg_Size])
 {
-    return read(fd, character, 1);
+    return read(fd, character, MD_Msg_Size);
 }
 
 rawSerialport::rawSerialport(char* device)
@@ -30,8 +30,8 @@ rawSerialport::rawSerialport(char* device)
 
     cfsetispeed( &tio, baudRate );
     cfsetospeed( &tio, baudRate );
-    tio.c_cc[VTIME] = 0;
-    tio.c_cc[VMIN] = 1;
+    tio.c_cc[VTIME] = 1;
+    tio.c_cc[VMIN] = MD_Msg_Size;
 
     //tcflush(fd, TCIFLUSH);
     tcsetattr( fd, TCSANOW, &tio );     // デバイスに設定を行う
