@@ -5,23 +5,45 @@
  *      Author: maleicacid
  */
 
-#include <ros/ros.h>
 #include <iostream>
 #include <thread>
+#include <signal.h>
+
 #include "comm.h"
 
+#include <ros/ros.h>
 #include "base_control/myTwistacc.h"
 #include "control_server/reference.h"
 
 using namespace std;
 
-const double a = 308.432;
-const double b = 308.432;
-const double radius = 0 ;
+const double a = 178.2;
+const double b = 290.0;
+const double radius = 101.6 ;
 
 #define rows 4
 #define cols 1
-void refMsgCallback(const base_control::myTwistacc::ConstPtr accel)
+
+std::mutex motor_refs_mutex;
+bool abort_flag = false;
+
+void MotorDriverHandler(const char* device)
+{
+    rawSerialport * a = new rawSerialport(device);
+    if(!a.isErr)
+    {
+        while(!abort_flag){    
+        //wait for mutex
+    
+        //Scilab ref
+    
+        //send ref
+        }
+    }
+    delete a;
+}
+
+void trajMsgCallback(const base_control::myTwistacc::ConstPtr accel)
 {
     //Matrix mul
     double trans[rows][3] = {
@@ -33,7 +55,7 @@ void refMsgCallback(const base_control::myTwistacc::ConstPtr accel)
     double twist_x[1][3] = {{0,0,0}};
     double result[rows][cols];
     #pragma omp parallel for
-    for (int i = 0; i < rows; i++) 
+    for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++) 
         {
@@ -44,16 +66,21 @@ void refMsgCallback(const base_control::myTwistacc::ConstPtr accel)
             result[i][j] = cc;
         }
     }
-    //Scilab ref
 
     /* critical section start */
+    //set motor angular velocities & angular accels
 
     /* end */
+}
+void mySigintHandler(int sig)
+{
+    abort_flag =true;
 }
 
 int main(int argc, char** argv)
 {
     vector<rawSerialport> motors;
+    vector<thread> motorThreads;
 
     if(argc<=4)
     {
@@ -61,19 +88,20 @@ int main(int argc, char** argv)
     }
     for(size_t i = 1; i <= 4; i++)
     {
-        rawSerialport a(argv[i]);
-        motors.push_back(a);
+        std::thread t(argv[i]);
+        motorThreads.push_back(t);
     }
 
-    //threads
-    
     //ROS
 	ros::init(argc, argv, "base_control");
 	ros::NodeHandle nh("~");
-	ros::Subscriber s_twist = nh.subscribe("v_accel", 100, refMsgCallback);
-    while(true){
+	ros::Subscriber reference_generation = nh.subscribe("v_accel", 100, trajMsgCallback);
+    
+	signal(SIGINT, mySigintHandler);
+    while(!abort_flag){
         /* code */
+        
         ros::spinOnce();
     }
-    
+    ros::shutdown();
 }
