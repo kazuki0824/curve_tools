@@ -10,7 +10,7 @@ int rawSerialport::tryReadMsg(char character[MD_Msg_Size])
     return read(fd, character, MD_Msg_Size);
 }
 
-rawSerialport::rawSerialport(char* device)
+rawSerialport::rawSerialport(const char* device)
 {
     speed_t baudRate = B115200;
 //Device Open

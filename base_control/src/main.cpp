@@ -5,8 +5,10 @@
  *      Author: maleicacid
  */
 
+#include <omp.h>
 #include <iostream>
 #include <thread>
+#include <mutex>
 #include <signal.h>
 
 #include "comm.h"
@@ -19,7 +21,7 @@ using namespace std;
 
 const double a = 178.2;
 const double b = 290.0;
-const double radius = 101.6 ;
+const double radius = 50.8 ;
 
 #define rows 4
 #define cols 1
@@ -30,7 +32,7 @@ bool abort_flag = false;
 void MotorDriverHandler(const char* device)
 {
     rawSerialport * a = new rawSerialport(device);
-    if(!a.isErr)
+    if(!a->isErr)
     {
         while(!abort_flag){    
         //wait for mutex
@@ -54,6 +56,11 @@ void trajMsgCallback(const base_control::myTwistacc::ConstPtr accel)
     };
     double twist_x[1][3] = {{0,0,0}};
     double result[rows][cols];
+#ifdef _OPENMP
+    cout << "OpenMP Enabled" << endl;
+#else
+    cout << "OpenMP Disabled" << endl;
+#endif
     #pragma omp parallel for
     for (int i = 0; i < rows; i++)
     {
