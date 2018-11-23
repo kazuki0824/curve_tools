@@ -45,7 +45,7 @@ void MotorDriverHandler(const char* device)
     delete a;
 }
 
-void trajMsgCallback(const base_control::myTwistacc::ConstPtr accel)
+void trajMsgCallback(const base_control::myTwistacc& accel)
 {
     //Matrix mul
     double trans[rows][3] = {

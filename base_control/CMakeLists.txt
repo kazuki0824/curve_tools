@@ -128,13 +128,17 @@ include_directories(
 ## OpenMP
 add_compile_options(-fopenmp)
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/llvm-7/lib")
   include_directories(/usr/lib/llvm-7/include/openmp)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/7/include)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/7")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/6/include)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/6")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/5/include)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/5")
 endif()
 
 ## Declare a C++ library
