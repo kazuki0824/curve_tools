@@ -125,6 +125,18 @@ include_directories(
   ${CMAKE_PREFIX_PATH}/include
 )
 
+## OpenMP
+add_compile_options(-fopenmp)
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+  include_directories(/usr/lib/llvm-7/include/openmp)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+  include_directories(/usr/lib/gcc/x86_64-linux-gnu/7/include)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0")
+  include_directories(/usr/lib/gcc/x86_64-linux-gnu/6/include)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_${LANG}_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+  include_directories(/usr/lib/gcc/x86_64-linux-gnu/5/include)
+endif()
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/base_control.cpp
@@ -156,11 +168,6 @@ target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
 )
 
-if(OpenMP_CXX_FOUND)
-  MESSAGE("${PROJECT_NAME} --> WITH_OPENMP")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
 #if cmake >= 3.9
 #find_package(OpenMP)
 #if(OpenMP_CXX_FOUND)
