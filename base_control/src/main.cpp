@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     }
     for(size_t i = 1; i <= 4; i++)
     {
-        std::thread t(argv[i]);
+        std::thread t(MotorDriverHandler, argv[i]);
         motorThreads.push_back(t);
     }
 
