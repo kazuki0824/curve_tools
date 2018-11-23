@@ -10,16 +10,16 @@
 #include <thread>
 #include "comm.h"
 
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Accel.h>
 #include "base_control/myTwistacc.h"
+#include "control_server/reference.h"
 
 using namespace std;
 
-void refMsgCallback(const geometry_msgs::Pose::ConstPtr accel)
+
+
+void refMsgCallback(const base_control::myTwistacc::ConstPtr accel)
 {
-	//TODO:
-	glutPostRedisplay();
+    
 }
 
 int main(int argc, char** argv)
