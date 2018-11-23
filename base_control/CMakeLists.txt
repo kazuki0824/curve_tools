@@ -71,7 +71,6 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs
   geometry_msgs
 )
 
@@ -122,6 +121,7 @@ catkin_package(
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_PREFIX_PATH}/include
 )
 
 ## Declare a C++ library
@@ -139,6 +139,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/base_control_node.cpp)
 add_executable(${PROJECT_NAME}_node src/main.cpp src/comm.cpp)
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
