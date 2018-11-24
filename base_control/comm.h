@@ -22,4 +22,8 @@ public:
     int ErrNo;
 };
 
+uint8_t ComposePackatFromMatrix(
+  const float* matrix, uint8_t row, uint8_t column, uint8_t id,
+  uint8_t* packet);
+
 #endif

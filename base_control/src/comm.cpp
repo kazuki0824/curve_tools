@@ -4,6 +4,54 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
+
+uint8_t ComposePackatFromMatrix(
+  const float* matrix, uint8_t row, uint8_t column, uint8_t id,
+  uint8_t* packet)
+{
+  // signature  : 1byte
+  // size       : 2byte
+  // id         : 1byte
+  // row        : 1byte
+  // column     : 1byte
+  // data       : (row * column) * 4byte
+  uint16_t size = 6 + sizeof(float) * row * column;
+  int offset = 0;
+
+#ifdef USE_SPRINTF
+
+  sprintf((char*)packet, "%f,%f,%f\n", matrix[0], matrix[1], matrix[2]);
+  return strlen((char*)packet);
+
+#else
+
+  // Write header
+  packet[0] = 0xFF;
+  packet[1] = (size >> 0) & 0xFF;
+  packet[2] = (size >> 8) & 0xFF;
+  packet[3] = id;
+  packet[4] = row;
+  packet[5] = column;
+  offset += 6;
+
+  // Write data
+  for(int i = 0; i < row * column; i++)
+  {
+    union {
+      float real;
+      uint8_t base[4];
+    } u_data;
+    u_data.real = packet[i];
+    packet[offset + 0] = u_data.base[0];
+    packet[offset + 1] = u_data.base[1];
+    packet[offset + 2] = u_data.base[2];
+    packet[offset + 3] = u_data.base[3];
+    offset += sizeof(packet[i]);
+  }
+  return offset;
+#endif
+}
 
 int rawSerialport::tryReadMsg(char character[MD_Msg_Size])
 {

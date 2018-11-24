@@ -41,7 +41,7 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
         while(!abort_flag)
         {
         //read state_variable
-            char msgs[MD_Msg_Size];
+            char msgs[MD_Msg_Size+20];
             if (a->tryReadMsg(msgs) == MD_Msg_Size)
             {
                 //TODO
@@ -72,8 +72,9 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
                 ref[1] = conversation.response.ref_.data[1];
             }
             motor_refs_mutex.unlock();
-        //TODO: send ref
-
+        //send ref
+            size_t msgsize =ComposePackatFromMatrix(ref, 2,1, 'r', msgs);
+            a->WriteMsg(msgs, msgsize);
         }
     }
     delete a;
