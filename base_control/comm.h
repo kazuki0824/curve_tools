@@ -1,6 +1,7 @@
 #ifndef _COMM_
 #define _COMM_
 
+#include <stddef.h>
 #include <termios.h>
 
 #define MD_Msg_Size 22 //TODO: ここをMDに合わせる

@@ -138,7 +138,7 @@ int main(int argc, char** argv)
 
     for(int i = 1; i <= 4; i++)
     {
-        motorThreads.push_back(std::thread(MotorDriverHandler, i, argv[i], client));
+        motorThreads.push_back(std::thread(MotorDriverHandler, i, argv[i], std::ref(client)));
     }
     
 	signal(SIGINT, mySigintHandler);
