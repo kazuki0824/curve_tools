@@ -73,7 +73,7 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
             }
             motor_refs_mutex.unlock();
         //send ref
-            size_t msgsize =ComposePackatFromMatrix((uint8_t*)ref, 2,1, 'r', msgs);
+            size_t msgsize =ComposePackatFromMatrix(ref, 2,1, 'r', (uint8_t*)msgs);
             a->WriteMsg(msgs, msgsize);
         }
     }
