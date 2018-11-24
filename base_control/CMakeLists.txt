@@ -125,18 +125,18 @@ include_directories(
   ${CMAKE_PREFIX_PATH}/include
 )
 
-if(NOT CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
+if(${CMAKE_VERSION} VERSION_LESS "3.9")
 add_compile_options(-fopenmp)
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/llvm-7/lib")
   include_directories(/usr/lib/llvm-7/include/openmp)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/7/include)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/7")
-elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "6.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/6/include)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/6")
-elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/5/include)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/5")
 endif()
@@ -158,12 +158,6 @@ endif()
 # add_executable(${PROJECT_NAME}_node src/base_control_node.cpp)
 add_executable(${PROJECT_NAME}_node src/main.cpp src/comm.cpp)
 
-## OpenMP
-#target_compile_options(${PROJECT_NAME}_node -fopenmp)
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
-  find_package(OpenMP)
-endif()
-
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -176,11 +170,21 @@ endif()
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node
-  ${catkin_LIBRARIES}
-  OpenMP::OpenMP_C
-  OpenMP::OpenMP_CXX
-)
+## OpenMP
+#target_compile_options(${PROJECT_NAME}_node -fopenmp)
+if(CMAKE_VERSION VERSION_GREATER "3.9")
+  find_package(OpenMP)
+  target_link_libraries(${PROJECT_NAME}_node
+    ${catkin_LIBRARIES}
+    OpenMP::OpenMP_C
+    OpenMP::OpenMP_CXX
+  )
+else()
+  target_link_libraries(${PROJECT_NAME}_node
+      ${catkin_LIBRARIES}
+  )
+endif()
+
 
 #############
 ## Install ##
