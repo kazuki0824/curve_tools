@@ -125,15 +125,9 @@ include_directories(
   ${CMAKE_PREFIX_PATH}/include
 )
 
-## OpenMP
-#target_compile_options(${PROJECT_NAME}_node -fopenmp)
+if(NOT CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
 add_compile_options(-fopenmp)
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
-  find_package(OpenMP)
-  if(OpenMP_CXX_FOUND)
-    target_link_libraries(MyTarget PUBLIC OpenMP::OpenMP_CXX)
-  endif()
-elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/llvm-7/lib")
   include_directories(/usr/lib/llvm-7/include/openmp)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
@@ -145,6 +139,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
   include_directories(/usr/lib/gcc/x86_64-linux-gnu/5/include)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/gcc/x86_64-linux-gnu/5")
+endif()
 endif()
 
 ## Declare a C++ library
@@ -162,6 +157,16 @@ endif()
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/base_control_node.cpp)
 add_executable(${PROJECT_NAME}_node src/main.cpp src/comm.cpp)
+
+## OpenMP
+#target_compile_options(${PROJECT_NAME}_node -fopenmp)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
+  find_package(OpenMP)
+  if(OpenMP_CXX_FOUND)
+    target_link_libraries(${PROJECT_NAME}_node PUBLIC OpenMP::OpenMP_CXX)
+  endif()
+endif()
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
