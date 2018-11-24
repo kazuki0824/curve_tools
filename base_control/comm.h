@@ -1,6 +1,7 @@
 #ifndef _COMM_
 #define _COMM_
 
+#include <stdint.h>
 #include <stddef.h>
 #include <termios.h>
 
