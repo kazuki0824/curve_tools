@@ -1,6 +1,6 @@
 float32 velo
 float32 accel
-float32 V
+float32 duty
 float32 Tf
 ---
 std_msgs/Float32MultiArray ref_

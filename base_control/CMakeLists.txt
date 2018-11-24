@@ -162,9 +162,6 @@ add_executable(${PROJECT_NAME}_node src/main.cpp src/comm.cpp)
 #target_compile_options(${PROJECT_NAME}_node -fopenmp)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
   find_package(OpenMP)
-  if(OpenMP_CXX_FOUND)
-    target_link_libraries(${PROJECT_NAME}_node PUBLIC OpenMP::OpenMP_CXX)
-  endif()
 endif()
 
 
@@ -181,6 +178,8 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  OpenMP::OpenMP_C
+  OpenMP::OpenMP_CXX
 )
 
 #############

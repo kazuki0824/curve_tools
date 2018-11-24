@@ -62,14 +62,14 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
             float ref_accel = wheel_reference[wheel_number-1][1];
         //Scilab ref
             control_server::reference conversation;
-            conversation.req.velo = ref_velo;
-            conversation.req.accel = ref_accel;
-            conversation.req.Tf = x_hat[2];
-            conversation.req.V = x_hat[3];
+            conversation.request.velo = ref_velo;
+            conversation.request.accel = ref_accel;
+            conversation.request.Tf = x_hat[2];
+            conversation.request.duty = x_hat[3];
             if (client.call(conversation))
             {
-                ref[0] = conversation.res.ref_[0];
-                ref[1] = conversation.res.ref_[1];
+                ref[0] = conversation.response.ref_[0];
+                ref[1] = conversation.response.ref_[1];
             }
             motor_refs_mutex.unlock();
         //TODO: send ref
@@ -90,7 +90,7 @@ void trajMsgCallback(const base_control::myTwistacc& tw)
     
     /* critical section start */
     //set motor angular velocities & angular accels
-    std::lock_guard<std::mutex> lock(motor_refs_mutex);
+    std::lock_guard<std::timed_mutex> lock(motor_refs_mutex);
     double twist_accel_x[2][3] = {{tw.Twist.linear.x,tw.Twist.linear.y,tw.Twist.angular.z},{tw.Accel.linear.x,tw.Accel.linear.y,tw.Accel.angular.z}};
     #pragma omp parallel for
     for (int i = 0; i < rows; i++)
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "base_control");
 	ros::NodeHandle nh("~");
 	ros::Subscriber reference_generation = nh.subscribe("v_accel", 100, trajMsgCallback);
-    ros::ServiceClient client = n.serviceClient<control_server::reference>("control_server_reference");
+    ros::ServiceClient client = nh.serviceClient<control_server::reference>("control_server_reference");
 
     vector<rawSerialport> motors;
     vector<thread> motorThreads;

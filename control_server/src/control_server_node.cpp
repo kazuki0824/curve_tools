@@ -21,7 +21,7 @@ bool Tuning(control_server::C1::Request &req, control_server::C1::Response &res)
 
 bool getRef(control_server::reference::Request &req, control_server::reference::Response &res)
 {
-	process_ref((double)req.velo, (double)req.accel, (double)req.V, (double)req.Tf);
+	process_ref((double)req.velo, (double)req.accel, (double)req.duty, (double)req.Tf);
 
 	int row,col;
 	double * result = read_matrix("ref", &row, &col);
