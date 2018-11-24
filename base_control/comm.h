@@ -3,7 +3,7 @@
 
 #include <termios.h>
 
-#define MD_Msg_Size 18 //TODO: ここをMDに合わせる
+#define MD_Msg_Size 22 //TODO: ここをMDに合わせる
 
 class rawSerialport
 {
@@ -15,6 +15,7 @@ public:
     rawSerialport(const char* deviceName);
     ~rawSerialport();
     
+    int WriteMsg(char * data, size_t size);
     int tryReadMsg(char character[MD_Msg_Size]);
     bool isErr;
     int ErrNo;

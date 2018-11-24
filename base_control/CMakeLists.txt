@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(base_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -126,8 +126,14 @@ include_directories(
 )
 
 ## OpenMP
+#target_compile_options(${PROJECT_NAME}_node -fopenmp)
 add_compile_options(-fopenmp)
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.9")
+  find_package(OpenMP)
+  if(OpenMP_CXX_FOUND)
+    target_link_libraries(MyTarget PUBLIC OpenMP::OpenMP_CXX)
+  endif()
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/llvm-7/lib")
   include_directories(/usr/lib/llvm-7/include/openmp)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0")
@@ -171,13 +177,6 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
 )
-
-#if cmake >= 3.9
-#find_package(OpenMP)
-#if(OpenMP_CXX_FOUND)
-#    target_link_libraries(MyTarget PUBLIC OpenMP::OpenMP_CXX)
-#endif()
-
 
 #############
 ## Install ##

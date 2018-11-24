@@ -10,6 +10,11 @@ int rawSerialport::tryReadMsg(char character[MD_Msg_Size])
     return read(fd, character, MD_Msg_Size);
 }
 
+int rawSerialport::WriteMsg(char * data, size_t size)
+{
+	return write(fd, data, size);
+}
+
 rawSerialport::rawSerialport(const char* device)
 {
     speed_t baudRate = B115200;
@@ -42,11 +47,4 @@ rawSerialport::~rawSerialport()
 {
 	tcsetattr(fd, TCSANOW, &tio_old);
 	close(fd);
-}
-
-
-
-std::vector<rawSerialport> openDevice(int argc, char** argv)
-{
-    
 }
