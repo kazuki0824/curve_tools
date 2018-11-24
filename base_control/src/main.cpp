@@ -68,8 +68,8 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
             conversation.request.duty = x_hat[3];
             if (client.call(conversation))
             {
-                ref[0] = conversation.response.ref_[0];
-                ref[1] = conversation.response.ref_[1];
+                ref[0] = conversation.response.ref_.data[0];
+                ref[1] = conversation.response.ref_.data[1];
             }
             motor_refs_mutex.unlock();
         //TODO: send ref
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
     vector<rawSerialport> motors;
     vector<thread> motorThreads;
 
-    for(size_t i = 1; i <= 4; i++)
+    for(int i = 1; i <= 4; i++)
     {
         motorThreads.push_back(std::thread(MotorDriverHandler, i, argv[i], client));
     }
