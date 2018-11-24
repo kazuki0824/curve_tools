@@ -39,7 +39,7 @@ int init_sci(char* scriptPath)
 void Init_MotorModel()
 {
     char JobString[100];
-    sprintf(JobString, "[sys_c_p, sys_u_p, sys_u, sys_f]=Motor(%f,%f,%f,%f,%f,%f,%f)" , E,b,J,K,R,L,T_pwm);
+    sprintf(JobString, "[sys_c_p, sys_u_p, sys_u, sys_f, E]=Motor(%f,%f,%f,%f,%f,%f,%f)" , E,b,J,K,R,L,T_pwm);
     SendScilabJob(JobString);
 
     sprintf(JobString, "[Fpd, f_u, Ap, Bp]=getFpd(%f,%f)", current_weight, input_weight);
@@ -55,10 +55,10 @@ int deinit_sci()
     return 0;
 }
 
-int process_ref(double velo, double accel, double V,double Tf)
+int process_ref(double velo, double accel, double duty, double Tf)
 {
     char JobString[100];
-    sprintf(JobString, "[ref, Idot]=calculate_ref(%f, %f, sys_c_p ,%f, %f)" , velo, accel ,V, Tf);
+    sprintf(JobString, "[ref, Idot]=calculate_ref(%f, %f, sys_c_p ,%f, %f)" , velo, accel, duty, Tf);
     SendScilabJob(JobString);
     return 0;
 }

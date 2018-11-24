@@ -17,7 +17,7 @@ function [A_, B_]=intersample24(sys)
 endfunction
 
 /*************/
-function [sys_c_p, sys_u_p, sys_u, sys_f]=Motor(E,b,J,K,R,L,T_pwm)
+function [sys_c_p, sys_u_p, sys_u, sys_f ,E]=Motor(E,b,J,K,R,L,T_pwm)
     
     A_cp=[-b/J K/J ; -K/L -R/L];
     B_cp=[0;1/L];
@@ -82,11 +82,12 @@ function [Fpd, f_u, Ap, Bp]=getFpd(current_weight, input_weight)
     Fpd=[Fp Fd*0.05]
 endfunction
 
-function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V)
-    [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V, 0);
+function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,duty)
+    [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,duty, 0);
 endfunction
 
-function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,V, Tf)
+function [ref, Idot]=calculate_ref(velo, accel, sys_c_p ,duty, Tf)
+    V=duty*E;
     Mat = sys_c_p.A;
     intm = [-Mat(1,1)/Mat(1,2) 1/Mat(1,2) ; Mat(2,1) 0]*[velo;accel];
     ref=[velo;intm(1)];
@@ -138,7 +139,7 @@ function simulation_triangle(duration , magn)
         //a_ref=-sin(2*%pi*(f0*time+k*time*time/2))*k*time * magn;
         a_ref=sign(round(time/4)-time/4)*magn
         V=E*u;
-        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,V, x_est(3));
+        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,u, x_est(3));
         ref1= (ref2+x_est(1:2,:))/2
         //C1
         [u1,xC1]=flts([ref1;ref2], C1, xC1);

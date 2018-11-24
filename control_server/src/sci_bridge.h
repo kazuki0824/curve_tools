@@ -12,7 +12,7 @@ int init_sci(char* scriptPath);
 int deinit_sci();
 double * read_matrix(const char variableToBeRetrieved[], int * rowCount, int * colCount);
 
-int process_ref(double velo, double accel, double V,double Tf);
+int process_ref(double velo, double accel, double duty, double Tf);
 int process_C1(double Kf[3]);
 
 int Init_MotorModel();
