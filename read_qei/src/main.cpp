@@ -14,64 +14,73 @@
 
 
 void* th_rx(void* pParam); //受信用スレッド
-void* th_tx(void* pParam); //送信用スレッド
 
 static bool isROS =false;
 ros::Publisher encoder_pub;
 
-pthread_mutex_t mutex; //2つのスレッド間で変数の保護を行う
-//　スレッド内で，   pthread_mutex_lock(&mutex);　　
-//    　           pthread_mutex_unlock(&mutex);
-// の間で排他処理をさせる
+int tty_fd = -1;
 
-int fd = -1;
+unsigned char c = 'D';
 
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 int main(int argc, char** argv){
-    struct termios tio_old, tio;
+    struct termios tio;
+    struct termios stdio;
+    struct termios old_stdio;
+    char buf[256];
+	
     speed_t baudRate = B115200;
-	int ret;
-	char buf[256];
-	pthread_t tid_tx, tid_rx; // Thread IDs
+	  pthread_t  tid_rx; // Thread IDs
     char default_device[256] = "/dev/ttyACM0";
     char * device = NULL;
+
+    tcgetattr(STDOUT_FILENO, &old_stdio);
 	if(argc < 2)
 	{
         printf("Open warning  : A device should be specified. Assume '/dev/ttyACM0'\n");
         device = default_device;
 	}
-    else
-    {
-        device = argv[1];
-    }
+  else
+  {
+      device = argv[1];
+  }
+
+    memset(&stdio, 0, sizeof(stdio));
+    stdio.c_iflag = 0;
+    stdio.c_oflag = 0;
+    stdio.c_cflag = 0;
+    stdio.c_lflag = 0;
+    stdio.c_cc[VMIN] = 1;
+    stdio.c_cc[VTIME] = 0;
+
+    tcsetattr(STDOUT_FILENO, TCSANOW, &stdio);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdio);
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+    memset(&tio, 0, sizeof(tio));
+    tio.c_iflag = 0;
+    tio.c_oflag = 0;
+    tio.c_cflag = CS8 | CREAD | CLOCAL;
+    tio.c_lflag = 0;
+    tio.c_cc[VMIN] = 1;
+    tio.c_cc[VTIME] = 5;
 
 //Device Open
-    fd = open(device, O_RDWR | O_NOCTTY);
-	if(fd < 0){
+    tty_fd = open(device, O_RDWR | O_NONBLOCK);
+	if(tty_fd < 0){
         printf("Open error : %s \n", device);
-        return fd;
+        tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
+        return tty_fd;
 	}
-
-    cfmakeraw(&tio);                    // RAWモード
-    tcgetattr(fd, &tio_old);
-    tio.c_cflag += CREAD;               // 受信有効
-    tio.c_cflag += CLOCAL;              // ローカルライン（モデム制御なし）
-    tio.c_cflag += CS8;                 // データビット:8bit
-    tio.c_cflag += 0;                   // ストップビット:1bit
-    tio.c_cflag += 0;                   // パリティ:None
 
     cfsetispeed( &tio, baudRate );
     cfsetospeed( &tio, baudRate );
-    tio.c_cc[VTIME] = 1;
-    tio.c_cc[VMIN] = 32;
-    //tio.c_cc[VMIN] = 1;
 
-    //tcflush(fd, TCIFLUSH);
-    tcsetattr( fd, TCSANOW, &tio );     // デバイスに設定を行う
+    //tcflush(tty_fd, TCIFLUSH);
+    tcsetattr( tty_fd, TCSANOW, &tio );     // デバイスに設定を行う
 
-//Device Open (finish)
 
 //Create threads
-	pthread_create(&tid_tx, NULL, th_tx, NULL);
 	pthread_create(&tid_rx, NULL, th_rx, NULL);
 
 //User check
@@ -93,169 +102,112 @@ int main(int argc, char** argv){
     do
     {
         ros::spinOnce();
-    }while(pthread_timedjoin_np(tid_tx, NULL, &ts)!=0);
-
-	pthread_cancel( tid_rx );
-	pthread_join(tid_rx,NULL);
+    }while(pthread_timedjoin_np(tid_rx, NULL, &ts)!=0);
 
 
-	pthread_mutex_destroy(&mutex); 
+	  pthread_mutex_destroy(&m); 
 
-	tcsetattr(fd, TCSANOW, &tio_old);
-	close(fd);
+    close(tty_fd);
+    tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
 }
 
 
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-float wheels[4] ={0.1};
+float wheels[4] ={0.0f};
 geometry_msgs::Twist msg;
-const int msgbodysize = 8; //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
+//自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
-	int ret;
-    char buf[64] ={0};
 
 	printf("Rx thread starts\n");
 
-	unsigned int reading_flag = 0;
-	struct mystruct
-	{
-		float velo[3];
-		short int e;
-		float wheels[4];
-	};
-	union
-	{
-		char Byte[30];
-		struct mystruct Body;
-	} u;
-    while(1){
-        usleep(1000);
-        memset(buf,0,64);
-        ret = read(fd, buf, 32);
-        if(ret == 32)
-        {
-            //1文字読み取れた
-            char* buf_ptr = (char*)memchr(buf, '#', 32);
-            if (buf_ptr ==NULL)
-            {
-                continue;
-            }
-            else if (buf_ptr[1] == '#')
-            {
-                int rest = buf_ptr-buf;
-                if(rest!=0)
-                {
-                    do
-                    {
-                        ret = read(fd, &buf[32], rest);
-                    } while (ret <= 0);
-                }
-                memcpy(u.Byte,&buf_ptr[2],30);
-                msg.linear.x = u.Body.velo[0];
-                msg.linear.y = u.Body.velo[1];
-                msg.angular.z = u.Body.velo[2];
-                for (int k = 0; k<4;k++)
-                {
-                    wheels[k]=u.Body.wheels[k];
-		    printf("%f,", u.Body.wheels[k]);
-                }
-		printf("\n");
-                if(isROS)
-                {
-                    encoder_pub.publish(msg);
-                }
-            }
-        }
-        else
-            continue;
+  int size;
+  int state = 0;
+  
+  typedef union __rawfloat
+  {
+    unsigned char raw[4];
+    float data;
+  }rawfloat;
+  typedef union __rawshort
+  {
+    unsigned char raw[2];
+    short data;
+  }rawshort;
+
+  rawfloat v[3];
+  rawshort err;
+  rawfloat enc[4];
+  int offset = 0;
+  printf("size of float : %d\r\n", sizeof(float));
+  printf("size of short : %d\r\n", sizeof(short));
+  while(c != 'q')
+  {
+    if(size = read(tty_fd, &c, 1) > 0)
+    {
+      //printf("c = %02x / state = %d\r\n", c, state);
+      switch(state)
+      {
+        case 0:
+        case 1:
+          if(c == '#')state++;
+          else
+          {
+            state = 0;
+            offset = 0;
+          }
+          break;
+        case 32:
+          printf("|\r\nvel : %f, %f, %f\r\nerr : %d\r\nenc : %f, %f, %f, %f\r\n\n", v[0].data, v[1].data, v[2].data, err.data, enc[0].data, enc[1].data, enc[2].data, enc[3].data);
+          msg.linear.x = v[0].data;
+          msg.linear.y = v[1].data;
+          msg.angular.z = v[2].data;
+          for (int k = 0; k<4;k++)
+          {
+            wheels[k] = enc[k].data;
+          }
+          if (isROS)
+          {
+            encoder_pub.publish(msg);
+          }
+          if(c == '#')state = 1;
+          else 
+          {
+            state = 0;
+            offset = 0;
+          }
+          break;
+        case 2:
+        case 6:
+        case 10:
+        case 14:
+        case 16:
+        case 20:
+        case 24:
+        case 28:
+          //printf("| ");
+        default:
+          //printf("%02x ", c);
+          if(state < 14)
+          {
+            offset = 2;
+            v[(state - offset) / 4].raw[(state - offset) % 4] = c;
+          }
+          else if(state < 16)
+          {
+            offset = 14;
+            err.raw[state - offset] = c;
+          }
+          else
+          {
+            offset = 16;
+            enc[(state - offset) / 4].raw[(state - offset) % 4] = c;
+          }
+          state++;
+          break;
+      }
     }
+    if(read(STDIN_FILENO, &c, 1) > 0)
+      write(tty_fd, &c, 1);
+  }
 
-    /*
-    while(1){
-        ret = read(fd, buf, 32);
-		if(ret > 0){
-			//1文字読み取れた
-			char r = buf[0];
-			switch (reading_flag)
-			{
-				case 0:
-				{
-                    if(r == '#')
-					{
-						reading_flag++;
-					}
-					else
-					{
-						reading_flag=0;
-					}
-					break;
-				}
-				case 1:
-				{
-					if(r == '#')
-					{
-						reading_flag++;
-					}
-					else
-					{
-						reading_flag=0;
-					}
-					break;
-				}
-				default:
-				{
-					if(reading_flag < 2 + msgbodysize)
-					{
-						//Body読み取り
-						u.Byte[reading_flag - 2] = r;
-						reading_flag++;
-					}
-					else
-					{
-                        if(reading_flag == 2 + msgbodysize)
-                        {
-                            msg.linear.x = u.Body.velo[0];
-                            msg.linear.y = u.Body.velo[1];
-                            msg.angular.z = u.Body.velo[2];
-                            if(isROS)
-                            {
-                                encoder_pub.publish(msg);
-                            }
-						}
-						reading_flag=0;
-					}
-				}
-			}
-		}
-		else
-            continue;
-	}
-    */
-
-//Never comes here!
 	printf("Rx thread ends\n");	
-}
-
-
-
-void* th_tx(void* pParam){
-	int ret;
-	char buf[64];
-	int val;
-	
-	printf("Tx thread starts\n");
-	printf("(Type 'e'+ Enter for exit)\n");
-
-	while(1){
-		fgets(buf, 64, stdin);
-		if(buf[0] == 'e' || buf[0] == 'E')
-			break;
-
-		val = strtol(buf, NULL, 0);
-		buf[0] = (char)(val & 0xff);
-		printf("TX:%02x\n", (unsigned char)buf[0]);
-		ret = write(fd, buf, 1);
-	}
-
-	printf("TX thread ends\n");
 }
