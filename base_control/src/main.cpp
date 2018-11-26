@@ -196,7 +196,7 @@ int main(int argc, char** argv)
 #pragma message "base_control: OpenMP Enabled"
     cout << "base_control: OpenMP Enabled" << endl;
 #else
-#pragma message "base_control: OpenMP Disabled"
+#warning "base_control: OpenMP Disabled"
     cout << "base_control: OpenMP Disabled" << endl;
 #endif
 

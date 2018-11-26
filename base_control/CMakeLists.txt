@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 project(base_control)
 
+option(USE_OPENMP "Matrix multiplication with OpenMP" ON)
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
@@ -125,7 +127,7 @@ include_directories(
   ${CMAKE_PREFIX_PATH}/include
 )
 
-if(${CMAKE_VERSION} VERSION_LESS "3.9")
+if(USE_OPENMP AND ${CMAKE_VERSION} VERSION_LESS "3.9")
 add_compile_options(-fopenmp)
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -L/usr/lib/llvm-7/lib")
@@ -172,7 +174,7 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 ## Specify libraries to link a library or executable target against
 ## OpenMP
 #target_compile_options(${PROJECT_NAME}_node -fopenmp)
-if(CMAKE_VERSION VERSION_GREATER "3.9")
+if(USE_OPENMP AND CMAKE_VERSION VERSION_GREATER "3.9")
   find_package(OpenMP)
   target_link_libraries(${PROJECT_NAME}_node
     ${catkin_LIBRARIES}
