@@ -19,13 +19,6 @@ uint8_t ComposePackatFromMatrix(
   uint16_t size = 6 + sizeof(float) * row * column;
   int offset = 0;
 
-#ifdef USE_SPRINTF
-
-  sprintf((char*)packet, "%f,%f,%f\n", matrix[0], matrix[1], matrix[2]);
-  return strlen((char*)packet);
-
-#else
-
   // Write header
   packet[0] = 0xFF;
   packet[1] = (size >> 0) & 0xFF;
@@ -50,12 +43,11 @@ uint8_t ComposePackatFromMatrix(
     offset += sizeof(packet[i]);
   }
   return offset;
-#endif
 }
 
-int rawSerialport::tryReadMsg(char character[MD_Msg_Size])
+int rawSerialport::tryReadMsg(char * character)
 {
-    return read(fd, character, MD_Msg_Size);
+    return read(fd, character, 1);
 }
 
 int rawSerialport::WriteMsg(char * data, size_t size)
@@ -71,20 +63,20 @@ rawSerialport::rawSerialport(const char* device)
 	if(fd < 0){
         printf("Open error : %s \n", device);
         ErrNo = fd; isErr =true;
+        return;
 	}
-
-    cfmakeraw(&tio);                    // RAWモード
     tcgetattr(fd, &tio_old);
-    tio.c_cflag += CREAD;               // 受信有効
-    tio.c_cflag += CLOCAL;              // ローカルライン（モデム制御なし）
-    tio.c_cflag += CS8;                 // データビット:8bit
-    tio.c_cflag += 0;                   // ストップビット:1bit
-    tio.c_cflag += 0;                   // パリティ:None
+
+    memset(&tio, 0, sizeof(tio));
+    tio.c_iflag = 0;
+    tio.c_oflag = 0;
+    tio.c_cflag = CS8 | CREAD | CLOCAL;
+    tio.c_lflag = 0;
+    tio.c_cc[VMIN] = 1;
+    tio.c_cc[VTIME] = 5;
 
     cfsetispeed( &tio, baudRate );
     cfsetospeed( &tio, baudRate );
-    tio.c_cc[VTIME] = 1;
-    tio.c_cc[VMIN] = MD_Msg_Size;
 
     //tcflush(fd, TCIFLUSH);
     tcsetattr( fd, TCSANOW, &tio );     // デバイスに設定を行う
@@ -93,6 +85,9 @@ rawSerialport::rawSerialport(const char* device)
 
 rawSerialport::~rawSerialport()
 {
+  if (!isErr)
+  {
 	tcsetattr(fd, TCSANOW, &tio_old);
 	close(fd);
+  }
 }

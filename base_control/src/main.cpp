@@ -38,17 +38,93 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
     {
         float ref[3] = {0.0,0.0,0.0};
         float x_hat[4] = {0.0,0.0,0.0,0.0}; //V on the bottom.
+        typedef union __rawfloat
+        {
+            unsigned char raw[4];
+            float data;
+        }rawfloat;
+        rawfloat x_recv[4];
+        unsigned int c ='D';
+        
+        int size;
+        int state = 0;
+        int offset = 0;
         while(!abort_flag)
         {
-        //read state_variable
-            char msgs[MD_Msg_Size+20];
-            if (a->tryReadMsg(msgs) == MD_Msg_Size)
+            //read state_variable
+            if(size = a->tryReadMsg(&c) > 0)
             {
-                //TODO
-            }
-            else
-            {
-                continue;
+                switch(state)
+                {
+                    case 0:
+                        if (c == 0xff) state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case 1:
+                        if (c == MD_Msg_Size & 0xff) state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case 2:
+                        if (c == (MD_Msg_Size >> 8) & 0xff) state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case 3:
+                        if (c == 'x') state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case 4:
+                        if (c == 4) state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case 5:
+                        if (c == 1) state++;
+                        else
+                        {
+                            state = 0;
+                            offset = 0;
+                        }
+                        break;
+                    case MD_Msg_Size:
+                        {
+                            //read
+                            for(int i = 0; i < 4; i++)
+                            {
+                                x_hat[i] = x_recv[i].data;
+                            }
+                            
+                            if(c == 0xff)state = 1;
+                            else 
+                            {
+                                state = 0;
+                                offset = 0;
+                            }
+                            break;
+                        }
+                    default:
+                        offset = 6;
+                        x_recv[(state - offset) / 4].raw[(state-offset) % 4] = c;
+                        break;
+                }
             }
 
         //wait for mutex
@@ -73,8 +149,9 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
             }
             motor_refs_mutex.unlock();
         //send ref
-            size_t msgsize =ComposePackatFromMatrix(ref, 2,1, 'r', (uint8_t*)msgs);
-            a->WriteMsg(msgs, msgsize);
+            uint8_t msgs[6+8];
+            size_t msgsize =ComposePackatFromMatrix(ref, 2,1, 'r', msgs);
+            a->WriteMsg((char*)msgs, msgsize);
         }
     }
     delete a;

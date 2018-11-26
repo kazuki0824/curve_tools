@@ -18,7 +18,7 @@ public:
     ~rawSerialport();
     
     int WriteMsg(char * data, size_t size);
-    int tryReadMsg(char character[MD_Msg_Size]);
+    int tryReadMsg(char * character);
     bool isErr;
     int ErrNo;
 };
