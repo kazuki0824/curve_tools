@@ -44,7 +44,7 @@ void MotorDriverHandler(int wheel_number, const char* device, ros::ServiceClient
             float data;
         }rawfloat;
         rawfloat x_recv[4];
-        unsigned int c ='D';
+        char c ='D';
         
         int size;
         int state = 0;
