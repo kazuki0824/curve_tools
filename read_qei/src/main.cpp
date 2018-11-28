@@ -105,15 +105,14 @@ int main(int argc, char** argv){
         ros::spinOnce();
     }while(pthread_timedjoin_np(tid_rx, NULL, &ts)!=0);
 
-
-	  pthread_mutex_destroy(&m); 
+    pthread_mutex_destroy(&m);
 
     close(tty_fd);
     tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
 }
 
 
-float wheels[4] ={0.0f};
+float wheels[4] ={0.0f, 0.0f, 0.0f, 0.0f};
 geometry_msgs::Twist msg;
 //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
