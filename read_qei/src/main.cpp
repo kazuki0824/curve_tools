@@ -49,9 +49,10 @@ int main(int argc, char** argv){
     stdio.c_iflag = 0;
     stdio.c_oflag = 0;
     stdio.c_cflag = 0;
-    stdio.c_lflag = 0;
+    stdio.c_lflag = ISIG;
     stdio.c_cc[VMIN] = 1;
     stdio.c_cc[VTIME] = 0;
+    stdio.c_cc[VINTR] = 0x03;
 
     tcsetattr(STDOUT_FILENO, TCSANOW, &stdio);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdio);
@@ -156,7 +157,7 @@ void* th_rx(void* pParam){
           }
           break;
         case 32:
-          printf("|\r\nvel : %f, %f, %f\r\nerr : %d\r\nenc : %f, %f, %f, %f\r\n\n", v[0].data, v[1].data, v[2].data, err.data, enc[0].data, enc[1].data, enc[2].data, enc[3].data);
+          //printf("|\r\nvel : %f, %f, %f\r\nerr : %d\r\nenc : %f, %f, %f, %f\r\n\n", v[0].data, v[1].data, v[2].data, err.data, enc[0].data, enc[1].data, enc[2].data, enc[3].data);
           msg.linear.x = v[0].data;
           msg.linear.y = v[1].data;
           msg.angular.z = v[2].data;

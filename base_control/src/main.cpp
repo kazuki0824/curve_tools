@@ -20,9 +20,10 @@
 
 using namespace std;
 
-const double a = 178.2;
-const double b = 290.0;
-const double radius = 50.8 ;
+//メートルで
+const double a = 0.1782;
+const double b = 0.29;
+const double radius = 0.0508 ;
 
 #define rows 4
 #define cols 2
