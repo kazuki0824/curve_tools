@@ -139,7 +139,7 @@ void* th_rx(void* pParam){
   int offset = 0;
   printf("size of float : %d\r\n", sizeof(float));
   printf("size of short : %d\r\n", sizeof(short));
-  while(c != 'q')
+  while(true)
   {
     if(size = read(tty_fd, &c, 1) > 0)
     {
