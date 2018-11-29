@@ -24,11 +24,18 @@ int tty_fd = -1;
 
 unsigned char c = 'D';
 
+struct termios old_stdio;
+void mySigintHandler(int sig)
+{
+	tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdio);
+	ros::shutdown();
+}
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 int main(int argc, char** argv){
+    signal(SIGINT, mySigintHandler);
     struct termios tio;
     struct termios stdio;
-    struct termios old_stdio;
     char buf[256];
 	
     speed_t baudRate = B115200;
@@ -111,6 +118,7 @@ int main(int argc, char** argv){
 
     close(tty_fd);
     tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdio);
 }
 
 
