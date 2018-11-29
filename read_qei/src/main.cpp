@@ -2,7 +2,9 @@
 #include <QApplication>
 
 #include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
 
 #include <termios.h>
 #include <unistd.h>
@@ -12,7 +14,7 @@
 #include <string.h>
 #include <pthread.h>
 
-
+#define refresh_rate 0.05
 void* th_rx(void* pParam); //受信用スレッド
 
 static bool isROS =false;
@@ -94,7 +96,7 @@ int main(int argc, char** argv){
 //ROS Init
 	ros::init(argc, argv, "read_qei");
 	ros::NodeHandle nh("~");
-    encoder_pub = nh.advertise<geometry_msgs::Twist>("robot_encoder", 100);
+    encoder_pub = nh.advertise<geometry_msgs::TwistStamped>("robot_encoder", 100);
     isROS = true;
 
 //Wait for threads end
@@ -113,7 +115,8 @@ int main(int argc, char** argv){
 
 
 float wheels[4] ={0.0f, 0.0f, 0.0f, 0.0f};
-geometry_msgs::Twist msg;
+float pose[3] = {0.0f, 0.0f, 0.0f};
+geometry_msgs::TwistStamped msg;
 //自己速度float(3)+誤差混入度q15_t(1)+エンコーダのfloatデータ(4) = 3*4+1*2+4*4=30bytes
 void* th_rx(void* pParam){
 
@@ -137,13 +140,12 @@ void* th_rx(void* pParam){
   rawshort err;
   rawfloat enc[4];
   int offset = 0;
-  printf("size of float : %d\r\n", sizeof(float));
-  printf("size of short : %d\r\n", sizeof(short));
+  bool isFirst = true;
+
   while(true)
   {
     if(size = read(tty_fd, &c, 1) > 0)
     {
-      //printf("c = %02x / state = %d\r\n", c, state);
       switch(state)
       {
         case 0:
@@ -156,16 +158,29 @@ void* th_rx(void* pParam){
           }
           break;
         case 32:
-          //printf("|\r\nvel : %f, %f, %f\r\nerr : %d\r\nenc : %f, %f, %f, %f\r\n\n", v[0].data, v[1].data, v[2].data, err.data, enc[0].data, enc[1].data, enc[2].data, enc[3].data);
-          msg.linear.x = v[0].data;
-          msg.linear.y = v[1].data;
-          msg.angular.z = v[2].data;
-          for (int k = 0; k<4;k++)
+          pose[0] += v[0].data;
+          pose[1] += v[1].data;
+          pose[2] += v[2].data;
+          for (int k = 0; k < 4;k++)
           {
             wheels[k] = enc[k].data;
           }
           if (isROS)
-          {
+          {    
+            static tf::TransformBroadcaster br;
+            tf::Transform transform;
+            tf::Quaternion q;
+
+            q.setRPY(0, 0, pose[2]);
+            transform.setOrigin(tf::Vector3(pose[0], pose[1], 0));
+            transform.setRotation(q);
+            br.sendTransform(tf::StampedTransform(transform , ros::Time::now(), "odom", "base_link"));
+
+            msg.twist.linear.x = v[0].data / refresh_rate;
+            msg.twist.linear.y = v[1].data / refresh_rate;
+            msg.twist.angular.z = v[2].data / refresh_rate;
+            msg.header.frame_id = "odom";
+            msg.header.stamp = ros::Time::now();
             encoder_pub.publish(msg);
           }
           if(c == '#')state = 1;
@@ -175,17 +190,7 @@ void* th_rx(void* pParam){
             offset = 0;
           }
           break;
-        case 2:
-        case 6:
-        case 10:
-        case 14:
-        case 16:
-        case 20:
-        case 24:
-        case 28:
-          //printf("| ");
         default:
-          //printf("%02x ", c);
           if(state < 14)
           {
             offset = 2;
