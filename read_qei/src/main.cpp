@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define refresh_rate 0.05
 void* th_rx(void* pParam); //受信用スレッド
