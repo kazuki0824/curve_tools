@@ -25,12 +25,13 @@ int tty_fd = -1;
 
 unsigned char c = 'D';
 
-struct termios old_stdio;
+struct termios old_stdin;
+struct termios old_stdout;
 void mySigintHandler(int sig)
 {
-	tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdio);
-	ros::shutdown();
+	tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdout);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdin);
+	if(isROS) ros::shutdown();
 }
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 int main(int argc, char** argv){
@@ -40,12 +41,13 @@ int main(int argc, char** argv){
     char buf[256];
 	
     speed_t baudRate = B115200;
-	pthread_t  tid_rx; // Thread IDs
+    pthread_t  tid_rx; // Thread IDs
     char default_device[256] = "/dev/ttyUSB0";
     char * device = NULL;
 
-    tcgetattr(STDOUT_FILENO, &old_stdio);
-	if(true || argc < 2)
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdin);
+    tcgetattr(STDOUT_FILENO, &old_stdout);
+	if(argc < 2)
 	{
         printf("Open warning  : A device should be specified. Assume '/dev/ttyUSB0'\n");
         device = default_device;
@@ -80,8 +82,8 @@ int main(int argc, char** argv){
     tty_fd = open(device, O_RDWR | O_NONBLOCK);
 	if(tty_fd < 0){
         printf("Open error : %s \n", device);
-		tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
-		tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdio);
+		tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdout);
+		tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdin);
         return tty_fd;
 	}
 
@@ -118,8 +120,8 @@ int main(int argc, char** argv){
     pthread_mutex_destroy(&m);
 
     close(tty_fd);
-    tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &stdio);
+    tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdout);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdin);
 }
 
 
