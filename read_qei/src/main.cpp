@@ -40,20 +40,20 @@ int main(int argc, char** argv){
     char buf[256];
 	
     speed_t baudRate = B115200;
-	  pthread_t  tid_rx; // Thread IDs
-    char default_device[256] = "/dev/ttyACM0";
+	pthread_t  tid_rx; // Thread IDs
+    char default_device[256] = "/dev/ttyUSB0";
     char * device = NULL;
 
     tcgetattr(STDOUT_FILENO, &old_stdio);
-	if(argc < 2)
+	if(true || argc < 2)
 	{
-        printf("Open warning  : A device should be specified. Assume '/dev/ttyACM0'\n");
+        printf("Open warning  : A device should be specified. Assume '/dev/ttyUSB0'\n");
         device = default_device;
 	}
-  else
-  {
-      device = argv[1];
-  }
+    else
+    {
+        device = argv[1];
+    }
 
     memset(&stdio, 0, sizeof(stdio));
     stdio.c_iflag = 0;
@@ -80,7 +80,8 @@ int main(int argc, char** argv){
     tty_fd = open(device, O_RDWR | O_NONBLOCK);
 	if(tty_fd < 0){
         printf("Open error : %s \n", device);
-        tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
+		tcsetattr(STDOUT_FILENO, TCSANOW, &old_stdio);
+		tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdio);
         return tty_fd;
 	}
 
@@ -99,7 +100,6 @@ int main(int argc, char** argv){
     MainWindow w;
     w.show();
     int ui_exitcode = app.exec();
-    //return app.exec();
 
 //ROS Init
 	ros::init(argc, argv, "read_qei");
