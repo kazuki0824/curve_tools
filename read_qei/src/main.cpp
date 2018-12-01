@@ -45,12 +45,13 @@ int main(int argc, char** argv){
     char default_device[256] = "/dev/ttyUSB0";
     char * device = NULL;
 
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_stdin);
+    tcgetattr(STDIN_FILENO, &old_stdin);
     tcgetattr(STDOUT_FILENO, &old_stdout);
 	if(argc < 2)
 	{
-        printf("Open warning  : A device should be specified. Assume '/dev/ttyUSB0'\n");
-        device = default_device;
+		printf("Open Error  : A device should be specified. Assume '/dev/ttyUSB0'\n");
+//        device = default_device;
+		return 255;
 	}
     else
     {
