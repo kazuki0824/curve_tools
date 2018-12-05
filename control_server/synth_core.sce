@@ -115,7 +115,7 @@ function simulation_triangle(duration , magn)
     
     //chirp signal
     f0= 0;//Hz
-    f1=1;//Hz
+    f1=3;//Hz
     k=(f1-f0)/duration;
     
     //simulation
@@ -134,10 +134,10 @@ function simulation_triangle(duration , magn)
     i=0
     tmp1=zeros(3,4);
     for time=0:sys_f.dt:duration
-        //v_ref=cos(2*%pi*(f0*time+k*time*time/2)) * magn;
-        v_ref=magn*(1-2*abs(round(time/4)-time/4));
-        //a_ref=-sin(2*%pi*(f0*time+k*time*time/2))*k*time * magn;
-        a_ref=sign(round(time/4)-time/4)*magn
+        v_ref=cos(2*%pi*(f0*time+k*time*time/2)) * magn;
+        //v_ref=magn*(1-2*abs(round(time/4)-time/4));
+        a_ref=-sin(2*%pi*(f0*time+k*time*time/2))*k*time * magn;
+        //a_ref=sign(round(time/4)-time/4)*magn
         V=E*u;
         [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,u, x_est(3));
         ref1= (ref2+x_est(1:2,:))/2

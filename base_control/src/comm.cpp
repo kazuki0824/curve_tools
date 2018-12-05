@@ -7,8 +7,8 @@
 #include <string.h>
 
 uint8_t ComposePackatFromMatrix(
-  const float* matrix, uint8_t row, uint8_t column, uint8_t id,
-  uint8_t* packet)
+    const float *matrix, uint8_t row, uint8_t column, uint8_t id,
+    uint8_t *packet)
 {
   // signature  : 1byte
   // size       : 2byte
@@ -29,7 +29,7 @@ uint8_t ComposePackatFromMatrix(
   offset += 6;
 
   // Write data
-  for(int i = 0; i < row * column; i++)
+  for (int i = 0; i < row * column; i++)
   {
     union {
       float real;
@@ -45,49 +45,49 @@ uint8_t ComposePackatFromMatrix(
   return offset;
 }
 
-int rawSerialport::tryReadMsg(char * character)
+int rawSerialport::tryReadMsg(char *character)
 {
-    return read(fd, character, 1);
+  return read(fd, character, 1);
 }
 
-int rawSerialport::WriteMsg(char * data, size_t size)
+int rawSerialport::WriteMsg(char *data, size_t size)
 {
-	return write(fd, data, size);
+  return write(fd, data, size);
 }
 
-rawSerialport::rawSerialport(const char* device)
+rawSerialport::rawSerialport(const char *device)
 {
-    speed_t baudRate = B115200;
-//Device Open
-    fd = open(device, O_RDWR | O_NOCTTY);
-	if(fd < 0){
-        printf("Open error : %s \n", device);
-        ErrNo = fd; isErr =true;
-        return;
-	}
-    tcgetattr(fd, &tio_old);
+  speed_t baudRate = B115200;
+  //Device Open
+  while ((fd = open(device, O_RDWR | O_NOCTTY)) < 0)
+  {
+    ROS_WARN("Open error : %s not found\n", device);
+    ErrNo = fd;
+    isErr = true;
+    sleep(1U);
+  }
+  tcgetattr(fd, &tio_old);
 
-    memset(&tio, 0, sizeof(tio));
-    tio.c_iflag = 0;
-    tio.c_oflag = 0;
-    tio.c_cflag = CS8 | CREAD | CLOCAL;
-    tio.c_lflag = 0;
-    tio.c_cc[VMIN] = 1;
-    tio.c_cc[VTIME] = 5;
+  memset(&tio, 0, sizeof(tio));
+  tio.c_iflag = 0;
+  tio.c_oflag = 0;
+  tio.c_cflag = CS8 | CREAD | CLOCAL;
+  tio.c_lflag = 0;
+  tio.c_cc[VMIN] = 1;
+  tio.c_cc[VTIME] = 5;
 
-    cfsetispeed( &tio, baudRate );
-    cfsetospeed( &tio, baudRate );
+  cfsetispeed(&tio, baudRate);
+  cfsetospeed(&tio, baudRate);
 
-    //tcflush(fd, TCIFLUSH);
-    tcsetattr( fd, TCSANOW, &tio );     // デバイスに設定を行う
-
+  //tcflush(fd, TCIFLUSH);
+  tcsetattr(fd, TCSANOW, &tio); // デバイスに設定を行う
 }
 
 rawSerialport::~rawSerialport()
 {
   if (!isErr)
   {
-	tcsetattr(fd, TCSANOW, &tio_old);
-	close(fd);
+    tcsetattr(fd, TCSANOW, &tio_old);
+    close(fd);
   }
 }
