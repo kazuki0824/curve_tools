@@ -20,6 +20,7 @@ public:
     int WriteMsg(char * data, size_t size);
     int tryReadMsg(char * character);
     bool isErr;
+    bool isOpen;
     int ErrNo;
 };
 

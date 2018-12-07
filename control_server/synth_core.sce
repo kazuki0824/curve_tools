@@ -139,7 +139,8 @@ function simulation_triangle(duration , magn)
         a_ref=-sin(2*%pi*(f0*time+k*time*time/2))*k*time * magn;
         //a_ref=sign(round(time/4)-time/4)*magn
         V=E*u;
-        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,u, x_est(3));
+//        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,u, x_est(3));
+        [ref2]=calculate_ref(v_ref, a_ref, sys_c_p ,0, x_est(3));
         ref1= (ref2+x_est(1:2,:))/2
         //C1
         [u1,xC1]=flts([ref1;ref2], C1, xC1);
@@ -162,6 +163,7 @@ function simulation_triangle(duration , magn)
         x_est_for_graph(1:3,1+(4*i):4*(i+1))=[x_est x_est x_est x_est ];
         U1_for_graph(1:1,1+(4*i):4*(i+1))=u1
         U2_for_graph(1:1,1+(4*i):4*(i+1))=u2
+        U_for_graph(1:1,1+(4*i):4*(i+1))=U
         /**/
                 i=i+1;
         //Observer
@@ -186,6 +188,8 @@ function simulation_triangle(duration , magn)
     plot2d(t_axis, U2_for_graph')
     scf();
     plot2d(t_axis, U1_for_graph'+U2_for_graph')
+    scf();
+    plot2d(t_axis, U_for_graph')
     
     //間引いて表示
     /*

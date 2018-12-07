@@ -47,16 +47,19 @@ uint8_t ComposePackatFromMatrix(
 
 int rawSerialport::tryReadMsg(char *character)
 {
-  return read(fd, character, 1);
+  if (isOpen)
+    return read(fd, character, 1);
 }
 
 int rawSerialport::WriteMsg(char *data, size_t size)
 {
-  return write(fd, data, size);
+  if (isOpen)
+    return write(fd, data, size);
 }
 
 rawSerialport::rawSerialport(const char *device)
 {
+  isOpen = false;
   speed_t baudRate = B115200;
   //Device Open
   while ((fd = open(device, O_RDWR | O_NOCTTY)) < 0)
@@ -64,7 +67,7 @@ rawSerialport::rawSerialport(const char *device)
     ROS_WARN("Open error : %s not found\n", device);
     ErrNo = fd;
     isErr = true;
-    sleep(1U);
+    sleep(5U);
   }
   tcgetattr(fd, &tio_old);
 
