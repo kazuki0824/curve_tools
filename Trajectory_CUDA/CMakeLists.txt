@@ -41,6 +41,7 @@ include_directories(
   ${CMAKE_PREFIX_PATH}/include
 )
 
+set(CUDA_HOST_COMPILER "gcc-5")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_60,code=sm_60 -O3 --use_fast_math -std=c++11 -Wno-deprecated-declarations")
 set(CUDA_SEPARABLE_COMPILATION OFF)
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)

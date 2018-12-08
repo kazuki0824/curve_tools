@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <ros/ros.h>
+
 uint8_t ComposePackatFromMatrix(
     const float *matrix, uint8_t row, uint8_t column, uint8_t id,
     uint8_t *packet)
