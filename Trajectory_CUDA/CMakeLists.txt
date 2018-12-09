@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0)
 project(trajectory)
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
