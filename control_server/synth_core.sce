@@ -61,6 +61,7 @@ function [C1]=C1synth(Ap, Bp, sys_u, sys_f, Fpd, Kf)
     M=eye(4,4)+z_*F*sys_f.B(1:2,:);
     N=z_*sys_f.C(:,1:2)*sys_f.B(1:2,:);
     C1=minreal((M-C2*N)*(Bp^-1))
+//    C1=((M-C2*N)*(Bp^-1))
     C1.dt=C2.dt
 endfunction
 
@@ -121,7 +122,7 @@ function simulation_triangle(duration , magn)
     //simulation
     X=[0;0;0];
     x_est=[0;0;0];
-    xC1=[0;0;0;0]
+    xC1=zeros(size(C1.A)(1),1)
     xC2=[0;0;0]
     u=0;
     
@@ -177,10 +178,14 @@ function simulation_triangle(duration , magn)
     end
     count= size(realX_for_graph)(2)
     t_axis=0:sys_f.dt/4:(sys_f.dt/4)*(count-1);
-    //reference=cos(2*%pi*(f0*t_axis+k*(t_axis^2)/2))*magn;
-    reference=magn*(1-2*abs(round(t_axis/4)-t_axis/4));
+    reference=cos(2*%pi*(f0*t_axis+k*(t_axis^2)/2))*magn;
+    //reference=magn*(1-2*abs(round(t_axis/4)-t_axis/4));
     scf();
     plot2d(t_axis, [realX_for_graph(1:3,:)'  reference(1,:)' ]);
+    scf();
+    plot2d(t_axis, [realX_for_graph(1,:)' reference(1,:)' ])
+    xlabel("時間[s]", "fontsize", 5);
+    ylabel("角速度[rad/s]", "fontsize", 5);
     scf();
     plot2d(t_axis, [realX_for_graph(1,:)' x_est_for_graph(1,:)' ])
     scf();
